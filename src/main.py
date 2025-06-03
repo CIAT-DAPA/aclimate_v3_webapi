@@ -1,0 +1,91 @@
+from fastapi import FastAPI
+from routes.auth import router as auth_router
+from routes.validate_token import router as validate_token_router
+from routes.hola import router as hola_router
+from routes.admin import router as admin_router
+from routes.get_all_countries import router as get_all_countries_router
+from routes.get_countries_by_name import router as get_countries_by_name_router
+from routes.get_admin1_by_country_id import router as get_admin1_by_country_id_router
+from routes.get_locations_by_country_ids import router as get_locations_by_country_ids_router
+from routes.get_adm2_by_adm1_ids import router as get_adm2_by_adm1_id_router
+from routes.get_adm2_by_country_id import router as get_adm2_by_country_id_router
+from routes.get_adm2_by_name import router as get_adm2_by_name_router
+
+from routes.get_climate_historical_daily_by_date import router as get_climate_historical_daily_by_date_router
+from routes.get_climate_historical_daily_by_date_range import router as get_climate_historical_daily_by_date_range_router
+
+from routes.get_climate_historical_monthly_by_measures import router as get_climate_historical_monthly_by_country_name_router
+from routes.get_climate_historical_monthly_by_all_measures import router as get_climate_historical_monthly_by_adm1_name_router
+
+from routes.get_climate_historical_monthly_by_date import router as get_climate_historical_monthly_by_date_router
+from routes.get_climate_historical_monthly_by_date_range import router as get_climate_historical_monthly_by_date_range_router
+from routes.get_climate_historical_climatology_by_all_measures import router as get_climate_historical_climatology_by_location_name_router
+
+from routes.get_climate_historical_climatology_by_month import router as get_climate_historical_climatology_by_month_router
+from routes.get_climate_historical_climatology_by_measures import router as get_climate_historical_climatology_by_measure_name_router
+from routes.get_climate_historical_daily_by_date_ranges_and_all_measures import router as get_climate_historical_daily_by_date_ranges_and_all_measures_router
+from routes.get_climate_historical_monthly_date_ranges import router as get_climate_historical_monthly_date_ranges_router
+from routes.get_locations_by_name import router as get_locations_by_name_router
+from routes.get_locations_by_adm2_ids import router as get_locations_by_adm2_ids_router
+from routes.get_climate_historical_daily_date_ranges import router as get_climate_historical_daily_date_ranges_router
+from routes.get_climate_historical_daily_by_date_range_and_measures import router as get_climate_historical_daily_by_date_range_and_measures_router
+from routes.get_climate_historical_climatology_date_ranges import router as get_climate_historical_climatology_date_ranges_router
+from routes.get_climate_historical_climatology_by_specific_month import router as get_climate_historical_climatology_by_specific_month_router
+from fastapi.middleware.cors import CORSMiddleware
+from aclimate_v3_orm.database.base import create_tables
+
+app = FastAPI(
+    title="Aclimate v3 API",
+    version="3.0",
+    description="API for Aclimate including various administrative levels and climate data."
+)
+
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# Routers
+app.include_router(auth_router)
+app.include_router(validate_token_router)
+#app.include_router(hola_router)
+#app.include_router(admin_router)
+app.include_router(get_all_countries_router)
+app.include_router(get_countries_by_name_router)
+app.include_router(get_admin1_by_country_id_router)
+
+app.include_router(get_adm2_by_adm1_id_router)
+app.include_router(get_adm2_by_country_id_router)
+app.include_router(get_adm2_by_name_router)
+app.include_router(get_locations_by_country_ids_router)
+app.include_router(get_locations_by_adm2_ids_router)
+app.include_router(get_locations_by_name_router)
+app.include_router(get_climate_historical_daily_date_ranges_router)
+
+app.include_router(get_climate_historical_daily_by_date_router)
+app.include_router(get_climate_historical_daily_by_date_range_router)
+app.include_router(get_climate_historical_monthly_date_ranges_router)
+app.include_router(get_climate_historical_monthly_by_country_name_router)
+app.include_router(get_climate_historical_monthly_by_adm1_name_router)
+app.include_router(get_climate_historical_monthly_by_date_router)
+app.include_router(get_climate_historical_monthly_by_date_range_router)
+app.include_router(get_climate_historical_climatology_date_ranges_router)
+
+app.include_router(get_climate_historical_climatology_by_location_name_router)
+app.include_router(get_climate_historical_climatology_by_specific_month_router)
+app.include_router(get_climate_historical_climatology_by_month_router)
+app.include_router(get_climate_historical_climatology_by_measure_name_router)
+
+app.include_router(get_climate_historical_daily_by_date_ranges_and_all_measures_router)
+app.include_router(get_climate_historical_daily_by_date_range_and_measures_router)
+
+def startup_event():
+    print(" Creando tablas al iniciar...")
+    create_tables()
+
+
+#uvicorn main:app --reload
