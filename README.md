@@ -63,13 +63,13 @@ pip install -r requirements.txt
 ## 🚀 Run the API
 
 Set up the environment variables in a `.env` file:
-
+```bash
 DATABASE_URL=postgresql://username:password@localhost:5432/database
 KEYCLOAK_URL=http://localhost:8080
 KEYCLOAK_REALM=<realm>
 KEYCLOAK_CLIENT_ID=<client-id>
 KEYCLOAK_CLIENT_SECRET=<client-secret>
-
+```
 ## 🚀 Run the API
 
 uvicorn main:app --reload
