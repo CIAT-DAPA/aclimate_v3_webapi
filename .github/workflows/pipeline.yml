@@ -120,20 +120,4 @@ jobs:
           asset_name: releaseAPI.zip
           asset_content_type: application/zip
 
-      - name: Checkout code
-        uses: actions/checkout@v3
-        with:
-          ref: main
-
-      - name: Update version in setup.py
-        run: |
-          sed -i "s/version='.*'/version='${{ steps.taggerDryRun.outputs.new_tag }}'/" setup.py
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Commit version change
-        uses: stefanzweifel/git-auto-commit-action@v4
-        with:
-          commit_message: "Update version to ${{ steps.taggerDryRun.outputs.new_tag }}"
-
 # ------- END RELEASE PROCCESS -------- #
