@@ -3,11 +3,10 @@ from typing import List
 from datetime import date
 from aclimate_v3_orm.services import ClimateHistoricalDailyService
 from aclimate_v3_orm.schemas import ClimateHistoricalDailyRead
-from dependencies.validate import get_current_user
 
 router = APIRouter(tags=["Climate Historical Daily"], prefix="/historical-daily")
 
-@router.get("/climate/by-date", response_model=List[dict])
+@router.get("/climate/by-date", response_model=List[dict], summary="Get Climate Historical Daily Data by Date and Measures")
 def get_by_date(
     location_ids: str = Query(..., description="Comma-separated location IDs, e.g. '1,2,3'"),
     measures: str = Query(..., description="Comma-separated measure short names, e.g. 'm1,m2'"),

@@ -11,11 +11,10 @@ KEYCLOAK_URL = os.getenv("KEYCLOAK_URL")
 REALM_NAME = os.getenv("REALM_NAME")
 CLIENT_ID = os.getenv("CLIENT_ID")
 
-router = APIRouter(tags=["Authentication"])
+router = APIRouter(tags=["Authentication"], prefix="/auth")
 
 JWKS_URL = f"{KEYCLOAK_URL}/realms/{REALM_NAME}/protocol/openid-connect/certs"
 
-# Reutilizable para otras rutas
 security = HTTPBearer()
 
 def get_jwks():
@@ -43,9 +42,20 @@ def validate_local_token(credentials: HTTPAuthorizationCredentials = Depends(sec
             audience="account",
             issuer=f"{KEYCLOAK_URL}/realms/{REALM_NAME}",
         )
-        return {"valid": True, "payload": payload}
-    
+
+        # Filtrar campos no deseados
+        filtered_payload = {
+            k: v for k, v in payload.items()
+            if k not in ["realm_access", "allowed-origins", "resource_access"]
+        }
+
+        client_roles = payload.get("resource_access", {}).get(CLIENT_ID, {}).get("roles", [])
+        filtered_payload["client_roles"] = client_roles
+
+        return {"valid": True, "payload": filtered_payload}
+
     except ExpiredSignatureError:
         raise HTTPException(status_code=401, detail="Expired token")
     except JWTError as e:
         raise HTTPException(status_code=401, detail=f"Invalid Token: {str(e)}")
+
