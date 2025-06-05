@@ -1,13 +1,39 @@
 from fastapi import APIRouter, Query
-from typing import List
+from typing import List, Optional
 from datetime import date
 from aclimate_v3_orm.services import ClimateHistoricalMonthlyService
-from aclimate_v3_orm.schemas import ClimateHistoricalMonthlyRead
-from dependencies.validate import get_current_user
+from pydantic import BaseModel
 
 router = APIRouter(tags=["Climate Historical Monthly"], prefix="/historical-monthly")
 
-@router.get("/monthly/by-date-range", response_model=List[dict])
+class ClimateHistoricalMonthly(BaseModel):
+    id: int
+    location_id: int
+    location_name: Optional[str]
+    measure_id: Optional[int]
+    measure_name: Optional[str]
+    measure_short_name: Optional[str]
+    measure_unit: Optional[str]
+    date: date
+    value: float
+
+    class Config:
+        from_attributes = True
+        json_schema_extra = {
+            "example": {
+                "id": 1,
+                "location_id": 123,
+                "location_name": "Test Location",
+                "measure_id": 5,
+                "measure_name": "Precipitación",
+                "measure_short_name": "m1",
+                "measure_unit": "mm",
+                "date": "2025-05-01",
+                "value": 45.6
+            }
+        }
+
+@router.get("/monthly/by-date-range", response_model=List[ClimateHistoricalMonthly])
 def get_by_date_range(
     location_ids: str = Query(..., description="Comma-separated location IDs, e.g. '1,2,3'"),
     start_date: date = Query(date(2025, 5, 1), description="Start date", example="2025-05-01"),
@@ -28,7 +54,7 @@ def get_by_date_range(
         filtered_data = [d for d in data if start_date <= d.date <= end_date]
         
         for d in filtered_data:
-            simplified = {
+            result.append({
                 "id": d.id,
                 "location_id": d.location_id,
                 "location_name": d.location.name if d.location else None,
@@ -38,7 +64,6 @@ def get_by_date_range(
                 "measure_unit": d.measure.unit if d.measure else None,
                 "date": d.date,
                 "value": d.value
-            }
-            result.append(simplified)
+            })
     
     return result

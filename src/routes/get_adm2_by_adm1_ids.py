@@ -1,7 +1,6 @@
 from fastapi import APIRouter, Depends, Query
 from aclimate_v3_orm.services.mng_admin_2_service import MngAdmin2Service
 from aclimate_v3_orm.schemas import Admin2Read
-from dependencies.validate import get_current_user
 from typing import List
 
 router = APIRouter(

@@ -1,20 +1,43 @@
 from fastapi import APIRouter, Depends, Query
 from aclimate_v3_orm.services.mng_admin_2_service import MngAdmin2Service
-from aclimate_v3_orm.schemas import Admin2Read
-from dependencies.validate import get_current_user
 from typing import List
+from pydantic import BaseModel
 
 router = APIRouter(
     prefix="/admin2",
     tags=["Admin levels"]
 )
 
-@router.get("/by-country-ids", response_model=List[dict])
+class Admin2(BaseModel):
+    id: int
+    name: str
+    admin1_id: int | None
+    admin1_name: str | None
+    country_id: int | None
+    country_name: str | None
+    country_iso2: str | None
+
+    class Config:
+        from_attributes = True
+        json_schema_extra = {
+            "example": {
+                "id": 302,
+                "name": "Valle del Cauca",
+                "admin1_id": 101,
+                "admin1_name": "Pacífico",
+                "country_id": 1,
+                "country_name": "Colombia",
+                "country_iso2": "CO"
+            }
+        }
+
+@router.get("/by-country-ids", response_model=List[Admin2])
 def get_admin2_by_country_ids(
     country_ids: str = Query(..., description="Comma-separated country IDs, e.g. '1,2,3'")
 ):
     """
     Return a flat list of admin2 with simplified fields for multiple country IDs.
+    - **country_ids**: Comma-separated list of country IDs.
     """
     ids = [int(cid.strip()) for cid in country_ids.split(",")]
     

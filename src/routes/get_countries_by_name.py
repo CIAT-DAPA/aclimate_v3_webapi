@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, Query
 from aclimate_v3_orm.services.mng_country_service import MngCountryService
 from aclimate_v3_orm.schemas import CountryRead
-from dependencies.validate import get_current_user
+from dependencies.auth_dependencies import get_current_user
 from typing import List
 
 router = APIRouter(tags=["Admin levels"])

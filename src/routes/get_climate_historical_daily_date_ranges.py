@@ -5,7 +5,8 @@ from typing import List
 
 router = APIRouter(tags=["Climate Historical Daily"], prefix="/historical-daily")
 
-@router.get("/by-location-ids-date-range", response_model=List[dict])
+@router.get("/date-range", response_model=List[dict], summary="Get date ranges by location IDs")
+
 def get_date_ranges_by_location_ids(
     location_ids: str = Query(..., description="Comma-separated location IDs")
 ):
