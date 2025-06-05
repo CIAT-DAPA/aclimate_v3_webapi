@@ -8,12 +8,13 @@ class ClientCredentials(BaseModel):
     client_id: str
     client_secret: str
 
-KEYCLOAK_BASE_URL = os.getenv("KEYCLOAK_URL")
-REALM = os.getenv("REALM_NAME")
-TOKEN_ENDPOINT = f"{KEYCLOAK_BASE_URL}/realms/{REALM}/protocol/openid-connect/token"
+
 
 @router.post("/get-client-token")
 async def get_token(body: ClientCredentials):
+    KEYCLOAK_BASE_URL = os.getenv("KEYCLOAK_URL")
+    REALM = os.getenv("REALM_NAME")
+    TOKEN_ENDPOINT = f"{KEYCLOAK_BASE_URL}/realms/{REALM}/protocol/openid-connect/token"
     data = {
         "grant_type": "client_credentials",
         "client_id": body.client_id,

@@ -8,10 +8,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-KEYCLOAK_URL = os.getenv("KEYCLOAK_URL")
-REALM_NAME = os.getenv("REALM_NAME")
-CLIENT_ID = os.getenv("CLIENT_ID")
-CLIENT_SECRET = os.getenv("CLIENT_SECRET")
+
 
 router = APIRouter(
     tags=["Authentication"], 
@@ -24,6 +21,10 @@ class LoginRequest(BaseModel):
 
 @router.post("/login", summary="Autentication with Keycloak", description="Get access and refresh tokens using Keycloak's password grant flow.")
 def login(data: LoginRequest):
+    KEYCLOAK_URL = os.getenv("KEYCLOAK_URL")
+    REALM_NAME = os.getenv("REALM_NAME")
+    CLIENT_ID = os.getenv("CLIENT_ID")
+    CLIENT_SECRET = os.getenv("CLIENT_SECRET")
     """
     Login endpoint to authenticate users with Keycloak.
     This endpoint uses the password grant type to obtain an access token and a refresh token.

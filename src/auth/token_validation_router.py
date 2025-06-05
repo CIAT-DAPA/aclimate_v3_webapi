@@ -7,30 +7,31 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-KEYCLOAK_URL = os.getenv("KEYCLOAK_URL")
-REALM_NAME = os.getenv("REALM_NAME")
-CLIENT_ID = os.getenv("CLIENT_ID")
 
 router = APIRouter(tags=["Authentication"], prefix="/auth")
 
-JWKS_URL = f"{KEYCLOAK_URL}/realms/{REALM_NAME}/protocol/openid-connect/certs"
+
 
 security = HTTPBearer()
 
-def get_jwks():
-    response = requests.get(JWKS_URL)
-    if response.status_code != 200:
-        raise Exception("Error fetching JWKS from Keycloak")
-    return response.json()
 
-JWKS = get_jwks()
 
-@router.get("/token/validate", summary="Validate JWT token", description="Validate a JWT token against Keycloak's public keys.")
+@router.get("/token/validate")
 def validate_local_token(credentials: HTTPAuthorizationCredentials = Depends(security)):
     token = credentials.credentials
     unverified_header = jwt.get_unverified_header(token)
 
-    key = next((k for k in JWKS["keys"] if k["kid"] == unverified_header["kid"]), None)
+    KEYCLOAK_URL = os.getenv("KEYCLOAK_URL", "http://localhost:8080")
+    REALM_NAME = os.getenv("REALM_NAME", "aclimate")
+    CLIENT_ID = os.getenv("CLIENT_ID", "dummy-client")
+
+    jwks_url = f"{KEYCLOAK_URL}/realms/{REALM_NAME}/protocol/openid-connect/certs"
+    response = requests.get(jwks_url)
+    if response.status_code != 200:
+        raise HTTPException(status_code=500, detail="Error fetching JWKS from Keycloak")
+    jwks = response.json()
+
+    key = next((k for k in jwks["keys"] if k["kid"] == unverified_header["kid"]), None)
     if not key:
         raise HTTPException(status_code=401, detail="Public key not found")
 
@@ -43,7 +44,6 @@ def validate_local_token(credentials: HTTPAuthorizationCredentials = Depends(sec
             issuer=f"{KEYCLOAK_URL}/realms/{REALM_NAME}",
         )
 
-        # Filtrar campos no deseados
         filtered_payload = {
             k: v for k, v in payload.items()
             if k not in ["realm_access", "allowed-origins", "resource_access"]
