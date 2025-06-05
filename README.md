@@ -60,7 +60,7 @@ git clone https://github.com/CIAT-DAPA/aclimate_v3_api.git
 cd src
 pip install -r requirements.txt
 ```
-## 🚀 Run the API
+## 🌱 Set the Environment Variables
 
 Set up the environment variables in a `.env` file:
 ```bash
