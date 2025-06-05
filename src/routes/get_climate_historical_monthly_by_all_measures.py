@@ -3,7 +3,6 @@ from typing import List
 from datetime import date
 from aclimate_v3_orm.services import ClimateHistoricalMonthlyService
 from aclimate_v3_orm.schemas import ClimateHistoricalMonthlyRead
-from dependencies.validate import get_current_user
 
 router = APIRouter(tags=["Climate Historical Monthly"], prefix="/historical-monthly")
 
