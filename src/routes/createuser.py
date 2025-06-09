@@ -35,8 +35,8 @@ class UserCreateRequest(BaseModel):
 async def get_admin_token():
     data = {
         "grant_type": "client_credentials",
-        "client_id": CLIENT_ID,       # 🔁 remplaza con el correcto
-        "client_secret": CLIENT_SECRET,   # 🔁 remplaza con el correcto
+        "client_id": CLIENT_ID,       
+        "client_secret": CLIENT_SECRET,  
     }
     headers = {"Content-Type": "application/x-www-form-urlencoded"}
     url = "http://localhost:8080/realms/aclimate/protocol/openid-connect/token"
