@@ -16,7 +16,7 @@ security = HTTPBearer()
 
 
 
-@router.get("/token/validate")
+@router.get("/token/validate", summary="Validate a keycloak token")
 def validate_local_token(credentials: HTTPAuthorizationCredentials = Depends(security)):
     token = credentials.credentials
     unverified_header = jwt.get_unverified_header(token)

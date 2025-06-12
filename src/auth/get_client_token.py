@@ -10,7 +10,7 @@ class ClientCredentials(BaseModel):
 
 
 
-@router.post("/get-client-token")
+@router.post("/get-client-token", summary="Get a Keycloak token using client credentials")
 async def get_token(body: ClientCredentials):
     KEYCLOAK_BASE_URL = os.getenv("KEYCLOAK_URL")
     REALM = os.getenv("REALM_NAME")
