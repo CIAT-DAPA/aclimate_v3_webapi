@@ -1,19 +1,16 @@
 from fastapi import APIRouter, Depends, HTTPException
 import requests
 import os
-from dependencies.auth_dependencies import require_roles  # Your role-based validator
+from dependencies.auth_dependencies import require_roles
 
 router = APIRouter(
     prefix="/users",
     tags=["Webadmin"]
 )
 
-
-
-
-@router.get("/get-users", summary="Get Webadmin users")
-def get_users_with_webadminsimple(current_user: dict = Depends(require_roles(["adminsuper"]))):
-        # Environment variables
+@router.get("/get-users", summary="Get users with their client roles")
+def get_users_with_client_roles(current_user: dict = Depends(require_roles(["adminsuper"]))):
+    # Environment variables
     KEYCLOAK_URL = os.getenv("KEYCLOAK_URL", "http://localhost:8080")
     REALM_NAME = os.getenv("REALM_NAME", "aclimate")
     CLIENT_ID_NAME = os.getenv("CLIENT_ID", "dummy-client")
@@ -29,7 +26,6 @@ def get_users_with_webadminsimple(current_user: dict = Depends(require_roles(["a
         },
         headers={"Content-Type": "application/x-www-form-urlencoded"}
     )
-
     if token_resp.status_code != 200:
         raise HTTPException(status_code=401, detail="Failed to obtain admin token")
     token = token_resp.json()["access_token"]
@@ -42,7 +38,6 @@ def get_users_with_webadminsimple(current_user: dict = Depends(require_roles(["a
     )
     if clients_resp.status_code != 200:
         raise HTTPException(status_code=clients_resp.status_code, detail="Failed to fetch clients")
-
     clients = clients_resp.json()
     client = next((c for c in clients if c["clientId"] == CLIENT_ID_NAME), None)
     if not client:
@@ -58,20 +53,22 @@ def get_users_with_webadminsimple(current_user: dict = Depends(require_roles(["a
         raise HTTPException(status_code=users_resp.status_code, detail="Failed to fetch users")
 
     all_users = users_resp.json()
-    filtered_users = []
+    enriched_users = []
 
-    # Step 4: Filter users with the 'webadminsimple' client role
+    # Step 4: Attach client roles to each user
     for user in all_users:
         user_id = user["id"]
+
         roles_resp = requests.get(
             f"{KEYCLOAK_URL}/admin/realms/{REALM_NAME}/users/{user_id}/role-mappings/clients/{client_uuid}",
             headers=headers
         )
         if roles_resp.status_code != 200:
+            user["client_roles"] = []
             continue
 
         roles = roles_resp.json()
-        if any(role["name"] == "webadminsimple" for role in roles):
-            filtered_users.append(user)
+        user["client_roles"] = [{"id": r["id"], "name": r["name"]} for r in roles]
+        enriched_users.append(user)
 
-    return filtered_users
+    return enriched_users

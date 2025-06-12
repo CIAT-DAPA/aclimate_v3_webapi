@@ -32,7 +32,7 @@ from routes.get_climate_historical_daily_date_ranges import router as get_climat
 from routes.get_climate_historical_daily_by_date_range_and_measures import router as get_climate_historical_daily_by_date_range_and_measures_router
 from routes.get_climate_historical_climatology_date_ranges import router as get_climate_historical_climatology_date_ranges_router
 from routes.get_climate_historical_climatology_by_specific_month import router as get_climate_historical_climatology_by_specific_month_router
-
+from routes.delete_users import router as delete_users_router
 from auth.get_client_token import router as get_client_token_router
 from fastapi.middleware.cors import CORSMiddleware
 from aclimate_v3_orm.database.base import create_tables
@@ -59,7 +59,7 @@ app.include_router(get_users_router)
 app.include_router(get_webadmin_roles_router)
 app.include_router(assing_role_to_user_router)
 app.include_router(createuser_router)
-
+app.include_router(delete_users_router)
 #app.include_router(hola_router)
 #app.include_router(admin_router)
 app.include_router(get_all_countries_router)
