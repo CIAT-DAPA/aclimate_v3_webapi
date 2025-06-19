@@ -38,6 +38,7 @@ from routes.create_rol import router as create_role_router
 from auth.get_client_token import router as get_client_token_router
 from routes.get_user_by_id import router as get_user_by_id_router
 from routes.edit_user import router as edit_user_router
+from routes.delete_rol import router as delete_role_router
 from fastapi.middleware.cors import CORSMiddleware
 from aclimate_v3_orm.database.base import create_tables
 
@@ -68,6 +69,8 @@ app.include_router(remove_role_to_user_router)
 app.include_router(create_role_router)
 app.include_router(get_user_by_id_router)
 app.include_router(edit_user_router)
+app.include_router(delete_role_router)
+
 #app.include_router(hola_router)
 #app.include_router(admin_router)
 app.include_router(get_all_countries_router)
