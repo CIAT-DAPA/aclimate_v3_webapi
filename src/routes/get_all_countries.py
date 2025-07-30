@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends
 from aclimate_v3_orm.services.mng_country_service import MngCountryService
 from typing import List
 from pydantic import BaseModel
-from dependencies.auth_dependencies import get_current_user  # Asegúrate que el import sea correcto
+from dependencies.auth_dependencies import get_current_user  
 
 router = APIRouter(tags=["Admin levels"])
 country_service = MngCountryService()
