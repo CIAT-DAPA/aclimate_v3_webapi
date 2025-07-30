@@ -9,8 +9,8 @@ router = APIRouter(tags=["Climate Historical Daily"], prefix="/historical-daily"
 @router.get("/climate/by-date-range-all-measures", response_model=List[dict], summary="Get Climate Historical Daily Data by Date Range and All Measures")
 def get_by_date_range_all_measures(
     location_ids: str = Query(..., description="Comma-separated location IDs, e.g. '1,2,3'"),
-    start_date: date = Query(date(2025, 5, 1), description="Start date", example="2025-05-01"),
-    end_date: date = Query(date(2025, 5, 26), description="End date", example="2025-05-26")
+    start_date: date = Query(date(2025, 5, 1), description="Start date", examples="2025-05-01"),
+    end_date: date = Query(date(2025, 5, 26), description="End date", examples="2025-05-26")
 ):
     """
     Returns simplified climate data for multiple location IDs and all measures within a date range.

@@ -14,6 +14,9 @@ class Location(BaseModel):
     name: str
     ext_id: Optional[str]
     visible: Optional[bool]
+    altitude: Optional[float]
+    latitude: Optional[float]
+    longitude: Optional[float]
     admin2_id: Optional[int]
     admin2_name: Optional[str]
     admin1_id: Optional[int]
@@ -30,6 +33,9 @@ class Location(BaseModel):
                 "name": "Test Location",
                 "ext_id": "EXT101",
                 "visible": True,
+                "altitude": 2850.0,
+                "latitude": -4.333,
+                "longitude": -74.55,
                 "admin2_id": 20,
                 "admin2_name": "Bogotá",
                 "admin1_id": 10,
@@ -39,6 +45,7 @@ class Location(BaseModel):
                 "country_iso2": "CO"
             }
         }
+
 
 @router.get("/by-country-ids", response_model=List[Location], summary="Get locations by country IDs")
 def get_locations_by_country_ids(
@@ -61,6 +68,9 @@ def get_locations_by_country_ids(
                 "name": loc.name,
                 "ext_id": loc.ext_id,
                 "visible": loc.visible,
+                "altitude": loc.altitude,
+                "latitude": loc.latitude,
+                "longitude": loc.longitude,
                 "admin2_id": loc.admin_2.id if loc.admin_2 else None,
                 "admin2_name": loc.admin_2.name if loc.admin_2 else None,
                 "admin1_id": loc.admin_2.admin_1.id if loc.admin_2 and loc.admin_2.admin_1 else None,

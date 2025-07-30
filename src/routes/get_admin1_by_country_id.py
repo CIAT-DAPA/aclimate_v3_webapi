@@ -1,7 +1,8 @@
-from fastapi import APIRouter, Query
+from fastapi import APIRouter, Query, Depends
 from typing import List, Optional
 from pydantic import BaseModel
 from aclimate_v3_orm.services.mng_admin_1_service import MngAdmin1Service
+from dependencies.auth_dependencies import get_current_user  
 
 router = APIRouter(
     prefix="/admin1",
@@ -30,9 +31,12 @@ class Admin1(BaseModel):
 
 
 @router.get("/by-country-ids", response_model=List[Admin1])
+
 def get_admin1_by_country_ids(
-    country_ids: str = Query(..., description="Comma-separated country IDs, e.g. '1,2,3'")
+    country_ids: str = Query(..., description="Comma-separated country IDs, e.g. '1,2,3'"),
+    user: dict = Depends(get_current_user)
 ):
+
     """
     Return a list of admin1 for multiple countries based on provided country IDs.
     - **country_ids**: Comma-separated list of country IDs.

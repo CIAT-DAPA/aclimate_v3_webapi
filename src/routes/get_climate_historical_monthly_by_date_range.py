@@ -36,8 +36,8 @@ class ClimateHistoricalMonthly(BaseModel):
 @router.get("/monthly/by-date-range", response_model=List[ClimateHistoricalMonthly])
 def get_by_date_range(
     location_ids: str = Query(..., description="Comma-separated location IDs, e.g. '1,2,3'"),
-    start_date: date = Query(date(2025, 5, 1), description="Start date", example="2025-05-01"),
-    end_date: date = Query(date(2025, 5, 26), description="End date", example="2025-06-01")
+    start_date: date = Query(date(2025, 5, 1), description="Start date", examples="2025-05-01"),
+    end_date: date = Query(date(2025, 5, 26), description="End date", examples="2025-06-01")
 ):
     """
     Returns  monthly climate data for specific location IDs within a date range.

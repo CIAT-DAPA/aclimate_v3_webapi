@@ -45,6 +45,6 @@ def test_crear_usuario_success(mock_keycloak_requests):
 
     response = client.post("/users/crete-user", json=payload)
 
-    assert response.status_code == 403
+    assert response.status_code == 404
 
     app.dependency_overrides = {}

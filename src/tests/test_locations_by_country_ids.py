@@ -30,19 +30,22 @@ def mock_locations():
             self.admin_1 = admin_1
 
     class Location:
-        def __init__(self, id, name, ext_id, visible, admin_2):
+        def __init__(self, id, name, ext_id, visible, admin_2, altitude=100.0, latitude=3.45, longitude=-76.53):
             self.id = id
             self.name = name
             self.ext_id = ext_id
             self.visible = visible
             self.admin_2 = admin_2
+            self.altitude = altitude
+            self.latitude = latitude
+            self.longitude = longitude
 
     country = Country(1, "Colombia", "CO")
     admin1 = Admin1(10, "Cundinamarca", country)
     admin2 = Admin2(20, "Bogotá", admin1)
 
     return [
-        Location(101, "Test Location", "EXT101", True, admin2)
+        Location(101, "Test Location", "EXT101", True, admin2, 123.45, 4.5, -74.1)
     ]
 
 def test_get_locations_by_country_ids(mock_locations):
