@@ -12,7 +12,7 @@ def get_countries_by_name(
     name: str = Query(
         "Colombia",  # Valor por defecto
         description="Country name",
-        example="Colombia"
+        examples="Colombia"
     )
 ):
     """

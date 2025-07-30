@@ -10,7 +10,7 @@ router = APIRouter(tags=["Climate Historical Daily"], prefix="/historical-daily"
 def get_by_date(
     location_ids: str = Query(..., description="Comma-separated location IDs, e.g. '1,2,3'"),
     measures: str = Query(..., description="Comma-separated measure short names, e.g. 'm1,m2'"),
-    specific_date: date = Query(date(2025, 5, 26), description="Specific date", example="2025-05-26")
+    specific_date: date = Query(date(2025, 5, 26), description="Specific date", examples="2025-05-26")
 ):
     """
     Returns  climate data for specific location IDs, measures, and a specific date.
