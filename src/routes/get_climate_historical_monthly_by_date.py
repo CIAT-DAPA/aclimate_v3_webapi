@@ -10,8 +10,8 @@ router = APIRouter(tags=["Climate Historical Monthly"], prefix="/historical-mont
 def get_by_date(
     location_ids: str = Query(..., description="Comma-separated location IDs, e.g. '1,2,3'"),
     measures: str = Query(..., description="Comma-separated measure short names, e.g. 'm1,m2'"),
-    year: int = Query(2025, description="Year", example=2025),
-    month: int = Query(5, description="Month", example=5)
+    year: int = Query(2025, description="Year", examples=2025),
+    month: int = Query(5, description="Month", examples=5)
 ):
     """
     Returns  monthly climate data for specific location IDs and measures for a specific year and month.
