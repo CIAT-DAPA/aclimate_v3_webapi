@@ -28,6 +28,7 @@ def get_locations_by_name(
             "altitude": loc.altitude,
             "latitude": loc.latitude,
             "longitude": loc.longitude,
+            "visible": loc.visible,
             "admin2_id": loc.admin_2.id if loc.admin_2 else None,
             "admin2_name": loc.admin_2.name if loc.admin_2 else None,
             "admin1_id": loc.admin_2.admin_1.id if loc.admin_2 and loc.admin_2.admin_1 else None,
