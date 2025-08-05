@@ -32,6 +32,7 @@ class UserCreateRequest(BaseModel):
     enabled: Optional[bool] = True
     attributes: Optional[Dict[str, str]] = None
     credentials: List[Credential]
+    groups: Optional[List[str]] = None
 
 
 async def get_admin_token():
@@ -71,6 +72,7 @@ async def create_user(
         "attributes": request.attributes or {}
     }
 
+
     async with httpx.AsyncClient() as client:
         # Step 1: Create the user
         create_resp = await client.post(
@@ -108,7 +110,7 @@ async def create_user(
         if role_resp.status_code != 200:
             raise HTTPException(status_code=500, detail="Failed to retrieve 'webadminsimple' role")
         role_data = role_resp.json()
-
+        
         # Step 5: Assign the role to the user
         assign_resp = await client.post(
             f"{KEYCLOAK_URL}/admin/realms/{REALM_NAME}/users/{user_id}/role-mappings/clients/{client_id}",
@@ -122,7 +124,32 @@ async def create_user(
             print("Role assignment error:", assign_resp.text)
             raise HTTPException(status_code=500, detail="Failed to assign 'webadminsimple' role")
 
+        # Step 6: Assign groups if provided
+        if request.groups:
+            # Get all groups from Keycloak
+            groups_resp = await client.get(
+                f"{KEYCLOAK_URL}/admin/realms/{REALM_NAME}/groups",
+                headers={"Authorization": f"Bearer {token}"}
+            )
+            if groups_resp.status_code != 200:
+                raise HTTPException(status_code=500, detail="Failed to fetch groups from Keycloak")
+            all_groups = groups_resp.json()
+            # Map group names to their IDs
+            group_id_map = {g["name"]: g["id"] for g in all_groups}
+            for group_name in request.groups:
+                group_id = group_id_map.get(group_name)
+                if not group_id:
+                    raise HTTPException(status_code=404, detail=f"Group '{group_name}' not found in Keycloak")
+                # Assign user to group
+                assign_group_resp = await client.put(
+                    f"{KEYCLOAK_URL}/admin/realms/{REALM_NAME}/users/{user_id}/groups/{group_id}",
+                    headers={"Authorization": f"Bearer {token}"}
+                )
+                if assign_group_resp.status_code not in (204, 201):
+                    raise HTTPException(status_code=500, detail=f"Failed to assign user to group '{group_name}'")
+
     return {
-        "message": "User created and 'webadminsimple' role assigned successfully",
-        "user_id": user_id
+        "message": "User created, 'webadminsimple' role assigned, and groups assigned successfully" if request.groups else "User created and 'webadminsimple' role assigned successfully",
+        "user_id": user_id,
+        "groups_assigned": request.groups if request.groups else []
     }
