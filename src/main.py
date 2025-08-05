@@ -25,6 +25,8 @@ from routes.get_climate_historical_climatology_by_all_measures import router as 
 from routes.get_climate_historical_indicator import router as get_climate_historical_indicator_router
 
 from routes.get_mng_indicators import router as get_mng_indicators_router
+from routes.get_groups import router as get_groups_router
+from routes.create_group import router as create_group_router
 
 from routes.get_climate_historical_climatology_by_month import router as get_climate_historical_climatology_by_month_router
 from routes.get_climate_historical_climatology_by_measures import router as get_climate_historical_climatology_by_measure_name_router
@@ -100,8 +102,10 @@ app.include_router(get_climate_historical_monthly_by_date_range_router)
 app.include_router(get_climate_historical_climatology_date_ranges_router)
 
 app.include_router(get_climate_historical_indicator_router)
-
 app.include_router(get_mng_indicators_router)
+
+app.include_router(get_groups_router)
+app.include_router(create_group_router)
 
 app.include_router(get_climate_historical_climatology_by_location_name_router)
 app.include_router(get_climate_historical_climatology_by_specific_month_router)
