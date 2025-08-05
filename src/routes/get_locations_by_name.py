@@ -24,7 +24,7 @@ def get_locations_by_name(
             "id": loc.id,
             "name": loc.name,
             "ext_id": loc.ext_id,
-            "visible": loc.visible,
+            "enable": loc.enable,
             "altitude": loc.altitude,
             "latitude": loc.latitude,
             "longitude": loc.longitude,

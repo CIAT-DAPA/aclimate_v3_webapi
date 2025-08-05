@@ -13,7 +13,7 @@ class Location(BaseModel):
     id: int
     name: str
     ext_id: Optional[str]
-    visible: Optional[bool]
+    enable: Optional[bool]
     altitude: Optional[float]
     latitude: Optional[float]
     longitude: Optional[float]
@@ -32,7 +32,7 @@ class Location(BaseModel):
                 "id": 101,
                 "name": "Test Location",
                 "ext_id": "EXT101",
-                "visible": True,
+                "enable": True,
                 "altitude": 2850.0,
                 "latitude": -4.333,
                 "longitude": -74.55,
@@ -67,7 +67,7 @@ def get_locations_by_country_ids(
                 "id": loc.id,
                 "name": loc.name,
                 "ext_id": loc.ext_id,
-                "visible": loc.visible,
+                "enable": loc.enable,
                 "altitude": loc.altitude,
                 "latitude": loc.latitude,
                 "longitude": loc.longitude,
