@@ -13,10 +13,11 @@ class Location(BaseModel):
     id: int
     name: str
     ext_id: Optional[str]
-    visible: Optional[bool]
+    enable: Optional[bool]
     altitude: Optional[float]
     latitude: Optional[float]
     longitude: Optional[float]
+    visible: Optional[bool] = True
     admin2_id: Optional[int]
     admin2_name: Optional[str]
     admin1_id: Optional[int]
@@ -32,10 +33,11 @@ class Location(BaseModel):
                 "id": 101,
                 "name": "Test Location",
                 "ext_id": "EXT101",
-                "visible": True,
+                "enable": True,
                 "altitude": 2850.0,
                 "latitude": -4.333,
                 "longitude": -74.55,
+                "visible": True,
                 "admin2_id": 20,
                 "admin2_name": "Bogotá",
                 "admin1_id": 10,
@@ -67,10 +69,11 @@ def get_locations_by_country_ids(
                 "id": loc.id,
                 "name": loc.name,
                 "ext_id": loc.ext_id,
-                "visible": loc.visible,
+                "enable": loc.enable,
                 "altitude": loc.altitude,
                 "latitude": loc.latitude,
                 "longitude": loc.longitude,
+                "visible": loc.visible,
                 "admin2_id": loc.admin_2.id if loc.admin_2 else None,
                 "admin2_name": loc.admin_2.name if loc.admin_2 else None,
                 "admin1_id": loc.admin_2.admin_1.id if loc.admin_2 and loc.admin_2.admin_1 else None,
