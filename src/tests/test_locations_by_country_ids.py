@@ -39,6 +39,7 @@ def mock_locations():
             self.altitude = altitude
             self.latitude = latitude
             self.longitude = longitude
+            self.enable = True
 
     country = Country(1, "Colombia", "CO")
     admin1 = Admin1(10, "Cundinamarca", country)
