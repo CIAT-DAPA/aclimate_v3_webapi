@@ -47,7 +47,7 @@ def mock_daily_data():
 def test_get_by_date_range(mock_daily_data):
     with patch("aclimate_v3_orm.services.climate_historical_daily_service.ClimateHistoricalDailyService.get_by_location_id", return_value=mock_daily_data):
         response = client.get(
-            "/historical-daily/climate/by-date-range",
+            "/historical-daily/by-date-range",
             params={
                 "location_ids": "1",
                 "start_date": "2025-05-01",

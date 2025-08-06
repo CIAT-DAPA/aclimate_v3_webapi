@@ -4,7 +4,7 @@ from aclimate_v3_orm.services.mng_location_service import MngLocationService
 from typing import List
 
 router = APIRouter(
-    prefix="/climate-monthly",
+    prefix="/historical-monthly",
     tags=["Climate Historical Monthly"]
 )
 
