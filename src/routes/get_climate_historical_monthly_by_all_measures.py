@@ -6,7 +6,7 @@ from aclimate_v3_orm.schemas import ClimateHistoricalMonthlyRead
 
 router = APIRouter(tags=["Climate Historical Monthly"], prefix="/historical-monthly")
 
-@router.get("/monthly/by-date-range-all-measures", response_model=List[dict])
+@router.get("/by-date-range-all-measures", response_model=List[dict])
 def get_by_date_range_all_measures(
     location_ids: str = Query(..., description="Comma-separated location IDs, e.g. '1,2,3'"),
     start_date: date = Query(date(2025, 5, 1), description="Start date", examples="2025-05-01"),
