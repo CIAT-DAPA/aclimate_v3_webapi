@@ -33,7 +33,7 @@ class ClimateHistoricalDaily(BaseModel):
             }
         }
 
-@router.get("/climate/by-date-range", response_model=List[ClimateHistoricalDaily], summary="Get Climate Historical Daily Data by Date Range")
+@router.get("/by-date-range", response_model=List[ClimateHistoricalDaily], summary="Get Climate Historical Daily Data by Date Range")
 def get_by_date_range(
     location_ids: str = Query(..., description="Comma-separated location IDs, e.g. '1,2,3'"),
     start_date: date = Query(date(2025, 5, 1), description="Start date", examples="2025-05-01"),
