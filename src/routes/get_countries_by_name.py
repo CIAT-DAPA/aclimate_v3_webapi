@@ -17,7 +17,7 @@ def get_countries_by_name(
 ):
     """
     Return a list of countries based on the provided country name with only id, name, and iso2.
-    - **name**: Name of the country for which countries are being queried.
+    - **name**: Name of the country to search for.
     """
     countries = country_service.get_by_name(name)
     
