@@ -55,20 +55,32 @@ def get_users_with_client_roles(current_user: dict = Depends(require_roles(["adm
     all_users = users_resp.json()
     enriched_users = []
 
-    # Step 4: Attach client roles to each user
+    # Step 4: Attach client roles and groups to each user
     for user in all_users:
         user_id = user["id"]
 
+        # Get client roles
         roles_resp = requests.get(
             f"{KEYCLOAK_URL}/admin/realms/{REALM_NAME}/users/{user_id}/role-mappings/clients/{client_uuid}",
             headers=headers
         )
         if roles_resp.status_code != 200:
             user["client_roles"] = []
-            continue
+        else:
+            roles = roles_resp.json()
+            user["client_roles"] = [{"id": r["id"], "name": r["name"]} for r in roles]
 
-        roles = roles_resp.json()
-        user["client_roles"] = [{"id": r["id"], "name": r["name"]} for r in roles]
+        # Get groups
+        groups_resp = requests.get(
+            f"{KEYCLOAK_URL}/admin/realms/{REALM_NAME}/users/{user_id}/groups",
+            headers=headers
+        )
+        if groups_resp.status_code != 200:
+            user["groups"] = []
+        else:
+            groups = groups_resp.json()
+            user["groups"] = [{"id": g["id"], "name": g["name"]} for g in groups]
+
         enriched_users.append(user)
 
     return enriched_users
