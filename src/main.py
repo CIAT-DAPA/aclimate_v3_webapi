@@ -25,16 +25,13 @@ from routes.get_climate_historical_climatology_by_all_measures import router as 
 from routes.get_climate_historical_indicator import router as get_climate_historical_indicator_router
 
 from routes.get_mng_indicators import router as get_mng_indicators_router
-from routes.get_groups import router as get_groups_router
-from routes.create_group import router as create_group_router
+from routes.get_mng_indicator_categories import router as get_mng_indicator_categories_router
+from routes.get_country_indicators import router as get_country_indicators_router
 
 from routes.minmax_indicator_by_location import router as minmax_indicator_by_location_router
 from routes.minmax_daily_by_location import router as minmax_daily_by_location_router
 from routes.minmax_monthly_by_location import router as minmax_monthly_by_location_router
 from routes.minmax_climatology_by_location import router as minmax_climatology_by_location_router
-
-from routes.assign_groups_to_user import router as assign_groups_to_user_router
-from routes.remove_groups_from_user import router as remove_groups_from_user_router
 
 from routes.get_climate_historical_climatology_by_month import router as get_climate_historical_climatology_by_month_router
 from routes.get_climate_historical_climatology_by_measures import router as get_climate_historical_climatology_by_measure_name_router
@@ -113,11 +110,8 @@ app.include_router(get_climate_historical_climatology_date_ranges_router)
 
 app.include_router(get_climate_historical_indicator_router)
 app.include_router(get_mng_indicators_router)
-
-app.include_router(get_groups_router)
-app.include_router(create_group_router)
-app.include_router(assign_groups_to_user_router)
-app.include_router(remove_groups_from_user_router)
+app.include_router(get_mng_indicator_categories_router)
+app.include_router(get_country_indicators_router)
 
 app.include_router(minmax_indicator_by_location_router)
 app.include_router(minmax_daily_by_location_router)
@@ -137,6 +131,5 @@ app.include_router(get_climate_historical_daily_by_date_range_and_measures_route
 def startup_event():
     print(" Creando tablas al iniciar...")
     create_tables()
-
 
 #uvicorn main:app --reload

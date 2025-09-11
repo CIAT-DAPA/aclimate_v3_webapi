@@ -69,16 +69,5 @@ def get_user_with_client_roles(
     else:
         roles = roles_resp.json()
         user["client_roles"] = [{"id": r["id"], "name": r["name"]} for r in roles]
-    
-    # Step 5: Get groups for this user
-    groups_resp = requests.get(
-        f"{KEYCLOAK_URL}/admin/realms/{REALM_NAME}/users/{user_id}/groups",
-        headers=headers
-    )
-    if groups_resp.status_code != 200:
-        user["groups"] = []
-    else:
-        groups = groups_resp.json()
-        user["groups"] = [{"id": g["id"], "name": g["name"]} for g in groups]
 
     return user
