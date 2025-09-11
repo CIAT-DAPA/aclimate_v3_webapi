@@ -130,3 +130,57 @@ def get_all_enabled():
             updated_at=d.updated_at
         ) for d in data
     ]
+
+@router.get("/by-category-id", response_model=List[Indicator])
+def get_by_category_id(
+    category_id: int = Query(..., description="Category ID", ge=1)
+):
+    """
+    Returns indicators filtered by category ID.
+    - **category_id**: ID of the category to filter by (e.g., 1, 2, 3).
+    """
+    service = MngIndicatorService()
+    try:
+        data = service.get_by_category_id(category_id)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Error fetching indicators by category ID: {str(e)}")
+    return [
+        Indicator(
+            id=d.id,
+            name=d.name,
+            short_name=d.short_name,
+            unit=d.unit,
+            type=d.type,
+            description=d.description,
+            enable=d.enable,
+            registered_at=d.registered_at,
+            updated_at=d.updated_at
+        ) for d in data
+    ]
+
+@router.get("/by-category-name", response_model=List[Indicator])
+def get_by_category_name(
+    category_name: str = Query(..., description="Category name")
+):
+    """
+    Returns indicators filtered by category name.
+    - **category_name**: Name of the category to filter by (e.g., 'Climate', 'Agroclimatic').
+    """
+    service = MngIndicatorService()
+    try:
+        data = service.get_by_category_name(category_name)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Error fetching indicators by category name: {str(e)}")
+    return [
+        Indicator(
+            id=d.id,
+            name=d.name,
+            short_name=d.short_name,
+            unit=d.unit,
+            type=d.type,
+            description=d.description,
+            enable=d.enable,
+            registered_at=d.registered_at,
+            updated_at=d.updated_at
+        ) for d in data
+    ]
