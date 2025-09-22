@@ -33,12 +33,12 @@ pipeline {
                 script {
                     try {
                         sshCommand remote: remote, command: """
-                            cd /var/www/aclimate/aclimate_v3_api/aclimate_v3_webapi/
+                            cd /var/www/aclimate/aclimate_v3_api/aclimate_v3_webapi
                             git checkout main
                             git pull origin main
                             source /opt/anaconda3/etc/profile.d/conda.sh
                             conda activate /home/scalderon/.conda/envs/aclimate_v3_api
-                            pip install -r requirements.txt
+                            pip install -r src/requirements.txt
                         """
                     } catch (Exception e) {
                         echo "Git Pull Error: ${e.message}"
@@ -52,6 +52,7 @@ pipeline {
                 script {
                     try {
                         sshCommand remote: remote, command: """
+                            cd /var/www/aclimate/aclimate_v3_api/aclimate_v3_webapi/src
                             source /opt/anaconda3/etc/profile.d/conda.sh
                             conda activate /home/scalderon/.conda/envs/aclimate_v3_api
                             fuser -k 3002/tcp || true
