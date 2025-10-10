@@ -20,8 +20,10 @@ class Location(BaseModel):
     visible: Optional[bool] = True
     admin2_id: Optional[int]
     admin2_name: Optional[str]
+    admin2_ext_id: Optional[str]
     admin1_id: Optional[int]
     admin1_name: Optional[str]
+    admin1_ext_id: Optional[str]
     country_id: int
     country_name: Optional[str]
     country_iso2: Optional[str]
@@ -40,8 +42,10 @@ class Location(BaseModel):
                 "visible": True,
                 "admin2_id": 20,
                 "admin2_name": "Bogotá",
+                "admin2_ext_id": "11001",
                 "admin1_id": 10,
                 "admin1_name": "Cundinamarca",
+                "admin1_ext_id": "11",
                 "country_id": 1,
                 "country_name": "Colombia",
                 "country_iso2": "CO"
