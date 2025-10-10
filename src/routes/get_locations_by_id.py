@@ -29,8 +29,10 @@ def get_locations_by_id(
             "longitude": location.longitude,
             "admin2_id": location.admin_2.id if location.admin_2 else None,
             "admin2_name": location.admin_2.name if location.admin_2 else None,
+            "admin2_ext_id": location.admin_2.ext_id if location.admin_2 else None,
             "admin1_id": location.admin_2.admin_1.id if location.admin_2 and location.admin_2.admin_1 else None,
             "admin1_name": location.admin_2.admin_1.name if location.admin_2 and location.admin_2.admin_1 else None,
+            "admin1_ext_id": location.admin_2.admin_1.ext_id if location.admin_2 and location.admin_2.admin_1 and location.admin_2.admin_1.ext_id else None,
             "country_id": location.admin_2.admin_1.country.id if location.admin_2 and location.admin_2.admin_1 and location.admin_2.admin_1.country else None,
             "country_name": location.admin_2.admin_1.country.name if location.admin_2 and location.admin_2.admin_1 and location.admin_2.admin_1.country else None,
             "country_iso2": location.admin_2.admin_1.country.iso2 if location.admin_2 and location.admin_2.admin_1 and location.admin_2.admin_1.country else None
