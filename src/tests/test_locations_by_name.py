@@ -18,16 +18,18 @@ def mock_locations():
             self.iso2 = iso2
 
     class Admin1:
-        def __init__(self, id, name, country):
+        def __init__(self, id, name, country, ext_id=None):
             self.id = id
             self.name = name
             self.country = country
+            self.ext_id = ext_id
 
     class Admin2:
-        def __init__(self, id, name, admin_1):
+        def __init__(self, id, name, admin_1, ext_id=None):
             self.id = id
             self.name = name
             self.admin_1 = admin_1
+            self.ext_id = ext_id
 
     class Location:
         def __init__(self, id, name, ext_id, visible, admin_2, altitude=100.0, latitude=3.45, longitude=-76.53):
@@ -42,8 +44,8 @@ def mock_locations():
             self.enable = True
 
     country = Country(1, "Colombia", "CO")
-    admin1 = Admin1(10, "Cundinamarca", country)
-    admin2 = Admin2(20, "Bogotá", admin1)
+    admin1 = Admin1(10, "Cundinamarca", country, "11")
+    admin2 = Admin2(20, "Bogotá", admin1, "11001")
 
     return [
         Location(101, "Test Location", "EXT101", True, admin2, 123.45, 4.5, -74.1)
@@ -65,8 +67,10 @@ def test_get_locations_by_name(mock_locations):
         assert loc["visible"] is True
         assert loc["admin2_id"] == 20
         assert loc["admin2_name"] == "Bogotá"
+        assert loc["admin2_ext_id"] == "11001"
         assert loc["admin1_id"] == 10
         assert loc["admin1_name"] == "Cundinamarca"
+        assert loc["admin1_ext_id"] == "11"
         assert loc["country_id"] == 1
         assert loc["country_name"] == "Colombia"
         assert loc["country_iso2"] == "CO"

@@ -13,6 +13,7 @@ router = APIRouter(
 class Admin1(BaseModel):
     id: int
     name: str
+    ext_id: str
     country_id: int
     country_name: str
     country_iso2: str
@@ -23,6 +24,7 @@ class Admin1(BaseModel):
             "example": {
                 "id": 101,
                 "name": "Antioquia",
+                "ext_id": "05",
                 "country_id": 1,
                 "country_name": "Colombia",
                 "country_iso2": "CO"
@@ -52,9 +54,11 @@ def get_admin1_by_country_ids(
             result.append({
                 "id": admin1.id,
                 "name": admin1.name,
+                "ext_id": admin1.ext_id,
                 "country_id": admin1.country.id,
                 "country_name": admin1.country.name,
-                "country_iso2": admin1.country.iso2
+                "country_iso2": admin1.country.iso2,
+                
             })
     
     return result
