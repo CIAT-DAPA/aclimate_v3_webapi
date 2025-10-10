@@ -34,9 +34,11 @@ def get_locations_by_admin2_ids(
                 "visible": loc.visible,
                 "admin2_id": loc.admin_2.id if loc.admin_2 else admin2_id,
                 "admin2_name": loc.admin_2.name if loc.admin_2 else None,
+                "admin2_ext_id": loc.admin_2.ext_id if loc.admin_2 else None,
                 "admin1_id": loc.admin_2.admin_1.id if loc.admin_2 and loc.admin_2.admin_1 else None,
                 "admin1_name": loc.admin_2.admin_1.name if loc.admin_2 and loc.admin_2.admin_1 else None,
                 "country_id": loc.admin_2.admin_1.country.id if loc.admin_2 and loc.admin_2.admin_1 and loc.admin_2.admin_1.country else None,
+                "admin1_ext_id": loc.admin_2.admin_1.ext_id if loc.admin_2 and loc.admin_2.admin_1 and loc.admin_2.admin_1.ext_id else None,
                 "country_name": loc.admin_2.admin_1.country.name if loc.admin_2 and loc.admin_2.admin_1 and loc.admin_2.admin_1.country else None,
                 "country_iso2": loc.admin_2.admin_1.country.iso2 if loc.admin_2 and loc.admin_2.admin_1 and loc.admin_2.admin_1.country else None
             }

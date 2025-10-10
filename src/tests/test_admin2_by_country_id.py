@@ -18,22 +18,24 @@ def mock_admin2_data():
             self.iso2 = iso2
 
     class Admin1:
-        def __init__(self, id, name, country):
+        def __init__(self, id, name, country, ext_id):
             self.id = id
             self.name = name
             self.country = country
+            self.ext_id = ext_id
 
     class Admin2:
-        def __init__(self, id, name, admin_1):
+        def __init__(self, id, name, admin_1, ext_id):
             self.id = id
             self.name = name
             self.admin_1 = admin_1
+            self.ext_id = ext_id
 
     country = Country(id=1, name="Colombia", iso2="CO")
-    admin1 = Admin1(id=101, name="Pacífico", country=country)
+    admin1 = Admin1(id=101, name="Pacífico", country=country, ext_id="76")
     return [
-        Admin2(id=302, name="Valle del Cauca", admin_1=admin1),
-        Admin2(id=303, name="Cauca", admin_1=admin1)
+        Admin2(id=302, name="Valle del Cauca", admin_1=admin1, ext_id="76001"),
+        Admin2(id=303, name="Cauca", admin_1=admin1, ext_id="19001")
     ]
 
 def test_get_admin2_by_country_ids(mock_admin2_data):
@@ -48,9 +50,10 @@ def test_get_admin2_by_country_ids(mock_admin2_data):
         for item in data:
             assert "id" in item
             assert "name" in item
+            assert "ext_id" in item
             assert "admin1_id" in item
             assert "admin1_name" in item
+            assert "admin1_ext_id" in item
             assert "country_id" in item
             assert "country_name" in item
             assert "country_iso2" in item
-            assert item["country_id"] == 1

@@ -24,8 +24,10 @@ def get_admin2_by_name(
         flat_admin2 = {
             "id": admin2.id,
             "name": admin2.name,
+            "ext_id": admin2.ext_id,
             "admin1_id": admin2.admin_1.id if admin2.admin_1 else None,
             "admin1_name": admin2.admin_1.name if admin2.admin_1 else None,
+            "admin1_ext_id": admin2.admin_1.ext_id if admin2.admin_1 else None,
             "country_id": admin2.admin_1.country.id if admin2.admin_1 and admin2.admin_1.country else None,
             "country_name": admin2.admin_1.country.name if admin2.admin_1 and admin2.admin_1.country else None,
             "country_iso2": admin2.admin_1.country.iso2 if admin2.admin_1 and admin2.admin_1.country else None

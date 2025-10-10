@@ -11,8 +11,10 @@ router = APIRouter(
 class Admin2(BaseModel):
     id: int
     name: str
+    ext_id: str
     admin1_id: int | None
     admin1_name: str | None
+    admin1_ext_id: str | None
     country_id: int | None
     country_name: str | None
     country_iso2: str | None
@@ -23,8 +25,10 @@ class Admin2(BaseModel):
             "example": {
                 "id": 302,
                 "name": "Valle del Cauca",
+                "ext_id": "76201",
                 "admin1_id": 101,
                 "admin1_name": "Pacífico",
+                "admin1_ext_id": "76",
                 "country_id": 1,
                 "country_name": "Colombia",
                 "country_iso2": "CO"
@@ -50,8 +54,10 @@ def get_admin2_by_country_ids(
             flat_admin2 = {
                 "id": admin2.id,
                 "name": admin2.name,
+                "ext_id": admin2.ext_id,
                 "admin1_id": admin2.admin_1.id if admin2.admin_1 else None,
                 "admin1_name": admin2.admin_1.name if admin2.admin_1 else None,
+                "admin1_ext_id": admin2.admin_1.ext_id if admin2.admin_1 else None,
                 "country_id": admin2.admin_1.country.id if admin2.admin_1 and admin2.admin_1.country else None,
                 "country_name": admin2.admin_1.country.name if admin2.admin_1 and admin2.admin_1.country else None,
                 "country_iso2": admin2.admin_1.country.iso2 if admin2.admin_1 and admin2.admin_1.country else None
