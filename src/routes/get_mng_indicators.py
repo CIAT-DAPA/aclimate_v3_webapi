@@ -114,6 +114,33 @@ def get_by_type(
             updated_at=d.updated_at
         ) for d in data
     ]
+@router.get("/by-id", response_model=List[Indicator])
+def get_by_id(
+    id: int = Query(..., description="Indicator ID")
+):
+    """
+    Returns indicators filtered by ID.
+    - **id**: ID of the indicator to filter by.
+    """
+    service = MngIndicatorService()
+
+    try:
+        data = service.get_by_id(id)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Invalid indicator ID: {id}")
+    return [
+        Indicator(
+            id=d.id,
+            name=d.name,
+            short_name=d.short_name,
+            unit=d.unit,
+            type=d.type,
+            description=d.description,
+            enable=d.enable,
+            registered_at=d.registered_at,
+            updated_at=d.updated_at
+        ) for d in data
+    ]
 
 @router.get("/all-enabled", response_model=List[Indicator])
 def get_all_enabled():
