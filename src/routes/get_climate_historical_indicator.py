@@ -203,3 +203,46 @@ def get_by_indicator_and_location(
             end_date=d.end_date
         ) for d in data
     ]
+
+@router.get("/by-location-date-period", response_model=List[ClimateHistoricalIndicatorRecord])
+def get_by_location_date_period(
+    location_id: int = Query(..., description="Location ID"),
+    start_date: str = Query(..., description="Start date (YYYY-MM-DD)"),
+    end_date: str = Query(..., description="End date (YYYY-MM-DD)"),
+    period: str = Query(..., description="Period type (e.g. monthly, yearly)")
+):
+    """
+    Returns historical indicator records filtered by:
+    - Location ID
+    - Date range (inclusive)
+    - Period type
+    
+    Example: /by-location-date-period?location_id=123&start_date=2023-01-01&end_date=2023-12-31&period=monthly
+    """
+    service = ClimateHistoricalIndicatorService()
+    
+    # Validación adicional para fechas
+    if start_date > end_date:
+        raise HTTPException(
+            status_code=400, 
+            detail="Start date cannot be after end date"
+        )
+    
+    period_upper = period.upper()
+    data = service.get_by_location_date_period(location_id, start_date, end_date, period_upper)
+    
+    return [
+        ClimateHistoricalIndicatorRecord(
+            id=d.id,
+            indicator_id=d.indicator_id,
+            indicator_name=d.indicator.name if d.indicator else None,
+            indicator_short_name=d.indicator.short_name if d.indicator else None,
+            indicator_unit=d.indicator.unit if d.indicator else None,
+            location_id=d.location_id,
+            location_name=d.location.name if d.location else None,
+            value=d.value,
+            period=d.period,
+            start_date=d.start_date,
+            end_date=d.end_date
+        ) for d in data
+    ]
