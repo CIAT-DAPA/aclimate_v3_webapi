@@ -12,6 +12,7 @@ class Indicator(BaseModel):
     short_name: str
     unit: str
     type: str
+    temporality: str
     description: Optional[str] = None
     enable: bool
     registered_at: Optional[datetime] = None
@@ -26,6 +27,7 @@ class Indicator(BaseModel):
                 "short_name": "crd",
                 "unit": "days",
                 "type": "CLIMATE",
+                "temporality": "MONTHLY",
                 "description": "Consecutive rainy days indicator",
                 "enable": True,
                 "registered_at": "2024-01-01T00:00:00Z",
@@ -51,6 +53,7 @@ def get_by_name(
             short_name=d.short_name,
             unit=d.unit,
             type=d.type,
+            temporality=d.temporality,
             description=d.description,
             enable=d.enable,
             registered_at=d.registered_at,
@@ -75,6 +78,7 @@ def get_by_short_name(
             short_name=d.short_name,
             unit=d.unit,
             type=d.type,
+            temporality=d.temporality,
             description=d.description,
             enable=d.enable,
             registered_at=d.registered_at,
@@ -103,6 +107,7 @@ def get_by_type(
             short_name=d.short_name,
             unit=d.unit,
             type=d.type,
+            temporality=d.temporality,
             description=d.description,
             enable=d.enable,
             registered_at=d.registered_at,
@@ -124,6 +129,7 @@ def get_all_enabled():
             short_name=d.short_name,
             unit=d.unit,
             type=d.type,
+            temporality=d.temporality,
             description=d.description,
             enable=d.enable,
             registered_at=d.registered_at,
@@ -151,6 +157,7 @@ def get_by_category_id(
             short_name=d.short_name,
             unit=d.unit,
             type=d.type,
+            temporality=d.temporality,
             description=d.description,
             enable=d.enable,
             registered_at=d.registered_at,
@@ -178,6 +185,37 @@ def get_by_category_name(
             short_name=d.short_name,
             unit=d.unit,
             type=d.type,
+            temporality=d.temporality,
+            description=d.description,
+            enable=d.enable,
+            registered_at=d.registered_at,
+            updated_at=d.updated_at
+        ) for d in data
+    ]
+
+
+@router.get("/by-temporality", response_model=List[Indicator])
+def get_by_temporality(
+    temporality: str = Query(..., description="Indicator temporality")
+):
+    """
+    Returns indicators filtered by temporality.
+    - **temporality**: Temporality of the indicator to filter by (e.g., 'DAILY', 'MONTHLY', 'ANNUAL').
+    """
+    service = MngIndicatorService()
+    temporality_upper = temporality.upper()
+    try:
+        data = service.get_by_temporality(temporality_upper)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Error fetching indicators by temporality: {str(e)}")
+    return [
+        Indicator(
+            id=d.id,
+            name=d.name,
+            short_name=d.short_name,
+            unit=d.unit,
+            type=d.type,
+            temporality=d.temporality,
             description=d.description,
             enable=d.enable,
             registered_at=d.registered_at,
