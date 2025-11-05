@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from auth.auth import router as auth_router
 from auth.token_validation_router import router as validate_token_router
+from routes.root_redirect import router as root_redirect_router
 from routes.createuser import router as createuser_router
 from routes.assing_role_to_user import router as assing_role_to_user_router
 from routes.get_webadmin_roles import router as get_webadmin_roles_router
@@ -70,6 +71,7 @@ app.add_middleware(
 )
 
 # Routers
+app.include_router(root_redirect_router)
 app.include_router(auth_router)
 app.include_router(validate_token_router)
 app.include_router(get_users_router)
@@ -83,8 +85,6 @@ app.include_router(get_user_by_id_router)
 app.include_router(edit_user_router)
 app.include_router(delete_role_router)
 
-#app.include_router(hola_router)
-#app.include_router(admin_router)
 app.include_router(get_all_countries_router)
 app.include_router(get_countries_by_name_router)
 app.include_router(get_admin1_by_country_id_router)
@@ -131,5 +131,5 @@ app.include_router(get_climate_historical_daily_by_date_range_and_measures_route
 def startup_event():
     print(" Creando tablas al iniciar...")
     create_tables()
-
+#startup_event
 #uvicorn main:app --reload
