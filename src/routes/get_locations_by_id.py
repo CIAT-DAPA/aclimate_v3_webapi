@@ -35,7 +35,8 @@ def get_locations_by_id(
             "admin1_ext_id": location.admin_2.admin_1.ext_id if location.admin_2 and location.admin_2.admin_1 and location.admin_2.admin_1.ext_id else None,
             "country_id": location.admin_2.admin_1.country.id if location.admin_2 and location.admin_2.admin_1 and location.admin_2.admin_1.country else None,
             "country_name": location.admin_2.admin_1.country.name if location.admin_2 and location.admin_2.admin_1 and location.admin_2.admin_1.country else None,
-            "country_iso2": location.admin_2.admin_1.country.iso2 if location.admin_2 and location.admin_2.admin_1 and location.admin_2.admin_1.country else None
+            "country_iso2": location.admin_2.admin_1.country.iso2 if location.admin_2 and location.admin_2.admin_1 and location.admin_2.admin_1.country else None,
+            "source": location.source.name if location.source else None
     }
 
     result.append(flat_loc)
