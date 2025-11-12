@@ -3,6 +3,7 @@ from fastapi import APIRouter, Query, HTTPException, Depends
 from typing import List, Optional
 from pydantic import BaseModel
 from aclimate_v3_orm.services.mng_indicators_service import MngIndicatorService
+from aclimate_v3_orm.services.mng_country_indicator_service import MngCountryIndicatorService
 
 from datetime import datetime
 
@@ -13,6 +14,7 @@ class Indicator(BaseModel):
     unit: str
     type: str
     temporality: str
+    indicator_category_id: int
     description: Optional[str] = None
     enable: bool
     registered_at: Optional[datetime] = None
@@ -28,6 +30,7 @@ class Indicator(BaseModel):
                 "unit": "days",
                 "type": "CLIMATE",
                 "temporality": "MONTHLY",
+                "indicator_category_id": 1,
                 "description": "Consecutive rainy days indicator",
                 "enable": True,
                 "registered_at": "2024-01-01T00:00:00Z",
@@ -54,6 +57,7 @@ def get_by_name(
             unit=d.unit,
             type=d.type,
             temporality=d.temporality,
+            indicator_category_id=d.indicator_category_id,
             description=d.description,
             enable=d.enable,
             registered_at=d.registered_at,
@@ -79,6 +83,7 @@ def get_by_short_name(
             unit=d.unit,
             type=d.type,
             temporality=d.temporality,
+            indicator_category_id=d.indicator_category_id,
             description=d.description,
             enable=d.enable,
             registered_at=d.registered_at,
@@ -108,39 +113,43 @@ def get_by_type(
             unit=d.unit,
             type=d.type,
             temporality=d.temporality,
+            indicator_category_id=d.indicator_category_id,
             description=d.description,
             enable=d.enable,
             registered_at=d.registered_at,
             updated_at=d.updated_at
         ) for d in data
     ]
-@router.get("/by-id", response_model=List[Indicator])
+@router.get("/by-id", response_model=Indicator)
 def get_by_id(
     id: int = Query(..., description="Indicator ID")
 ):
     """
-    Returns indicators filtered by ID.
+    Returns indicator filtered by ID.
     - **id**: ID of the indicator to filter by.
     """
     service = MngIndicatorService()
 
     try:
         data = service.get_by_id(id)
+        if not data:
+            raise HTTPException(status_code=404, detail=f"Indicator with ID {id} not found")
+        
+        return Indicator(
+            id=data.id,
+            name=data.name,
+            short_name=data.short_name,
+            unit=data.unit,
+            type=data.type,
+            temporality=data.temporality,
+            indicator_category_id=data.indicator_category_id,
+            description=data.description,
+            enable=data.enable,
+            registered_at=data.registered_at,
+            updated_at=data.updated_at
+        )
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Invalid indicator ID: {id}")
-    return [
-        Indicator(
-            id=d.id,
-            name=d.name,
-            short_name=d.short_name,
-            unit=d.unit,
-            type=d.type,
-            description=d.description,
-            enable=d.enable,
-            registered_at=d.registered_at,
-            updated_at=d.updated_at
-        ) for d in data
-    ]
 
 @router.get("/all-enabled", response_model=List[Indicator])
 def get_all_enabled():
@@ -157,6 +166,7 @@ def get_all_enabled():
             unit=d.unit,
             type=d.type,
             temporality=d.temporality,
+            indicator_category_id=d.indicator_category_id,
             description=d.description,
             enable=d.enable,
             registered_at=d.registered_at,
@@ -185,6 +195,7 @@ def get_by_category_id(
             unit=d.unit,
             type=d.type,
             temporality=d.temporality,
+            indicator_category_id=d.indicator_category_id,
             description=d.description,
             enable=d.enable,
             registered_at=d.registered_at,
@@ -198,7 +209,7 @@ def get_by_category_name(
 ):
     """
     Returns indicators filtered by category name.
-    - **category_name**: Name of the category to filter by (e.g., 'Climate', 'Agroclimatic').
+    - **category_name**: Name of the category to filter by (e.g., 'Extreme Temperature', 'Heat Stress').
     """
     service = MngIndicatorService()
     try:
@@ -213,6 +224,7 @@ def get_by_category_name(
             unit=d.unit,
             type=d.type,
             temporality=d.temporality,
+            indicator_category_id=d.indicator_category_id,
             description=d.description,
             enable=d.enable,
             registered_at=d.registered_at,
@@ -243,9 +255,81 @@ def get_by_temporality(
             unit=d.unit,
             type=d.type,
             temporality=d.temporality,
+            indicator_category_id=d.indicator_category_id,
             description=d.description,
             enable=d.enable,
             registered_at=d.registered_at,
             updated_at=d.updated_at
         ) for d in data
     ]
+
+@router.get("/by-country", response_model=List[Indicator])
+def get_by_country(
+    country_id: int = Query(..., description="Country ID"),
+    temporality: Optional[str] = Query(None, description="Indicator temporality (e.g., 'DAILY', 'MONTHLY', 'ANNUAL')"),
+    category_id: Optional[int] = Query(None, description="Category ID"),
+    type: str = Query("CLIMATE", description="Indicator type (default: 'CLIMATE')")
+):
+    """
+    Returns indicators filtered by country and optionally by temporality, category, and type.
+    - **country_id**: ID of the country to filter by (required).
+    - **temporality**: Temporality of the indicator to filter by (e.g., 'DAILY', 'MONTHLY', 'ANNUAL') (optional).
+    - **category_id**: ID of the category to filter by (optional).
+    - **type**: Type of the indicator to filter by (default: 'CLIMATE').
+    """
+    try:
+        # Get indicators by country using MngCountryIndicatorService
+        country_indicator_service = MngCountryIndicatorService()
+        country_indicators = country_indicator_service.get_by_country(country_id)
+        
+        if not country_indicators:
+            return []
+        
+        # Extract indicator IDs from country indicators
+        indicator_ids = [ci.indicator_id for ci in country_indicators]
+
+        # Get full indicator details using MngIndicatorService
+        indicator_service = MngIndicatorService()
+        
+        # Start with getting all indicators for this country
+        all_indicators = []
+        for indicator_id in indicator_ids:
+            indicator_data = indicator_service.get_by_id(indicator_id)
+            if indicator_data:  # Check if data exists
+                all_indicators.append(indicator_data)
+
+        # Apply filters
+        filtered_indicators = []
+        for indicator in all_indicators:
+            # Filter by type (case insensitive)
+            if type.lower() != indicator.type:
+                continue
+            
+            # Filter by temporality if provided
+            if temporality and temporality.lower() != indicator.temporality:
+                continue
+            
+            # Filter by category_id if provided
+            if category_id and category_id != indicator.indicator_category_id:
+                continue
+            
+            filtered_indicators.append(indicator)
+        
+        return [
+            Indicator(
+                id=d.id,
+                name=d.name,
+                short_name=d.short_name,
+                unit=d.unit,
+                type=d.type,
+                temporality=d.temporality,
+                indicator_category_id=d.indicator_category_id,
+                description=d.description,
+                enable=d.enable,
+                registered_at=d.registered_at,
+                updated_at=d.updated_at
+            ) for d in filtered_indicators
+        ]
+        
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Error fetching indicators by country: {str(e)}")
