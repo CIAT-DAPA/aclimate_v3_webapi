@@ -12,20 +12,21 @@ client = TestClient(app)
 @pytest.fixture
 def mock_mng_indicator_data():
     class Indicator:
-        def __init__(self, id, name, short_name, unit, type_, temporality, description, enable, registered_at, updated_at):
+        def __init__(self, id, name, short_name, unit, type_, temporality, indicator_category_id, description, enable, registered_at, updated_at):
             self.id = id
             self.name = name
             self.short_name = short_name
             self.unit = unit
             self.type = type_
             self.temporality = temporality
+            self.indicator_category_id= indicator_category_id
             self.description = description
             self.enable = enable
             self.registered_at = registered_at
             self.updated_at = updated_at
     return [
-        Indicator(1, "consecutive_rainy_days", "crd", "days", "CLIMATE", "MONTHLY", "desc", True, "2024-01-01T00:00:00", "2024-01-02T00:00:00"),
-        Indicator(2, "precipitation", "prec", "mm", "CLIMATE", "MONTHLY", "desc", True, "2024-01-01T00:00:00", "2024-01-02T00:00:00")
+        Indicator(1, "consecutive_rainy_days", "crd", "days", "CLIMATE", "MONTHLY", 1, "desc", True, "2024-01-01T00:00:00", "2024-01-02T00:00:00"),
+        Indicator(2, "precipitation", "prec", "mm", "CLIMATE", "MONTHLY", 1, "desc", True, "2024-01-01T00:00:00", "2024-01-02T00:00:00")
     ]
 
 def test_get_mng_by_name(mock_mng_indicator_data):
@@ -41,6 +42,7 @@ def test_get_mng_by_name(mock_mng_indicator_data):
             assert "unit" in item
             assert "type" in item
             assert "temporality" in item
+            assert "indicator_category_id" in item
             assert "description" in item
             assert "enable" in item
             assert "registered_at" in item
