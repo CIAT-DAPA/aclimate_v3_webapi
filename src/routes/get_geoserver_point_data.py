@@ -49,7 +49,6 @@ def process_date_data(date_info: Dict, coordinates: List[List[float]], auth: tup
     
     try:
         response = requests.get(url, auth=auth)
-        
         if response.status_code == 404:
             # No data for this date
             return results
@@ -59,23 +58,51 @@ def process_date_data(date_info: Dict, coordinates: List[List[float]], auth: tup
         # Process the raster and extract values for each coordinate
         with MemoryFile(response.content) as memfile:
             with memfile.open() as raster:
+                data_array = raster.read(1)
+                
                 for coord in coordinates:
                     lon, lat = coord[0], coord[1]
                     
                     try:
+                        # Check if coordinate is within bounds
+                        if not (raster.bounds.left <= lon <= raster.bounds.right and 
+                                raster.bounds.bottom <= lat <= raster.bounds.top):
+                            continue
+                        
                         # Get value from specific point
                         row, col = raster.index(lon, lat)
-                        value = raster.read(1)[row, col]
+                        
+                        # Check if indices are within raster dimensions
+                        if row < 0 or row >= raster.height or col < 0 or col >= raster.width:
+                            continue
+                        
+                        value = data_array[row, col]
+                        
+                        # If the exact pixel is NaN, try nearby pixels
+                        if np.isnan(value):
+                            # Check 3x3 neighborhood
+                            found_valid = False
+                            for dr in [-1, 0, 1]:
+                                for dc in [-1, 0, 1]:
+                                    nr, nc = row + dr, col + dc
+                                    if (0 <= nr < raster.height and 0 <= nc < raster.width):
+                                        nearby_value = data_array[nr, nc]
+                                        if not np.isnan(nearby_value) and nearby_value != -9999:
+                                            value = nearby_value
+                                            found_valid = True
+                                            break
+                                if found_valid:
+                                    break
                         
                         # Filter invalid values
-                        if value != -9999 and not np.isnan(value):
+                        if not np.isnan(value) and value != -9999 and (raster.nodata is None or value != raster.nodata):
                             results.append(PointDataResult(
                                 coordinate=[lon, lat],
                                 date=date_str,
                                 value=float(value)
                             ))
+                            
                     except Exception:
-                        # Coordinate outside raster bounds, continue
                         continue
                         
     except requests.exceptions.RequestException:
