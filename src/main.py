@@ -52,6 +52,8 @@ from auth.get_client_token import router as get_client_token_router
 from routes.get_user_by_id import router as get_user_by_id_router
 from routes.edit_user import router as edit_user_router
 from routes.delete_rol import router as delete_role_router
+# Geoserver route
+from routes.get_geoserver_point_data import router as get_geoserver_point_data_router
 from fastapi.middleware.cors import CORSMiddleware
 from aclimate_v3_orm.database.base import create_tables
 
@@ -126,6 +128,8 @@ app.include_router(get_client_token_router)
 app.include_router(get_climate_historical_daily_by_date_ranges_and_all_measures_router)
 app.include_router(get_climate_historical_daily_by_date_range_and_measures_router)
 
+# Geoserver router
+app.include_router(get_geoserver_point_data_router)
 
 
 def startup_event():
