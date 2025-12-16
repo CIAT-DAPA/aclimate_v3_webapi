@@ -7,6 +7,7 @@ import numpy as np
 import os
 from urllib.parse import urlencode
 from rasterio.io import MemoryFile
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from dependencies.auth_dependencies import get_current_user
 
 router = APIRouter(tags=["Geoserver Point Data"], prefix="/geoserver")
@@ -27,6 +28,62 @@ class PointDataResult(BaseModel):
     coordinate: List[float]  # [lon, lat]
     date: str
     value: float
+
+def process_date_data(date_info: Dict, coordinates: List[List[float]], auth: tuple, url_root: str, workspace: str, store: str) -> List[PointDataResult]:
+    """
+    Process data for a specific date and return results for all coordinates.
+    """
+    results = []
+    current_date, date_str, time_subset = date_info['date'], date_info['date_str'], date_info['time_subset']
+    
+    # Build URL to get the raster
+    base_url = f"{url_root}{workspace}/ows?"
+    params = {
+        "service": "WCS",
+        "request": "GetCoverage", 
+        "version": "2.0.1",
+        "coverageId": store,
+        "format": "image/geotiff",
+        "subset": time_subset
+    }
+    url = base_url + urlencode(params)
+    
+    try:
+        response = requests.get(url, auth=auth)
+        
+        if response.status_code == 404:
+            # No data for this date
+            return results
+            
+        response.raise_for_status()
+        
+        # Process the raster and extract values for each coordinate
+        with MemoryFile(response.content) as memfile:
+            with memfile.open() as raster:
+                for coord in coordinates:
+                    lon, lat = coord[0], coord[1]
+                    
+                    try:
+                        # Get value from specific point
+                        row, col = raster.index(lon, lat)
+                        value = raster.read(1)[row, col]
+                        
+                        # Filter invalid values
+                        if value != -9999 and not np.isnan(value):
+                            results.append(PointDataResult(
+                                coordinate=[lon, lat],
+                                date=date_str,
+                                value=float(value)
+                            ))
+                    except Exception:
+                        # Coordinate outside raster bounds, continue
+                        continue
+                        
+    except requests.exceptions.RequestException:
+        # Error in request for this date
+        pass
+    
+    return results
 
 @router.post("/point-data")
 def get_point_data_from_coordinates(
@@ -51,11 +108,14 @@ def get_point_data_from_coordinates(
         if not geoserver_user or not geoserver_password:
             raise HTTPException(status_code=500, detail="Geoserver credentials not configured")
         
+        # Get max workers from environment variable, default to 4
+        max_workers = int(os.getenv('MAX_WORKERS', '4'))
+        
         url_root = "https://geo.aclimate.org/geoserver/"
         auth = (geoserver_user, geoserver_password)
-        results = []
         
-        # Generate dates based on temporality
+        # Generate all date information first
+        dates_to_process = []
         current_date = request.start_date
         end_date = request.end_date
         
@@ -64,17 +124,7 @@ def get_point_data_from_coordinates(
             month = current_date.month
             day = current_date.day
             
-            # Build URL to get the raster based on temporality
-            base_url = f"{url_root}{request.workspace}/ows?"
-            params = {
-                "service": "WCS",
-                "request": "GetCoverage", 
-                "version": "2.0.1",
-                "coverageId": request.store,
-                "format": "image/geotiff"
-            }
-            
-            # Set time subset based on temporality
+            # Set time subset and date string based on temporality
             if request.temporality == "daily":
                 time_subset = f"Time(\"{year:04d}-{month:02d}-{day:02d}T00:00:00.000Z\")"
                 date_str = f"{year:04d}-{month:02d}-{day:02d}"
@@ -85,52 +135,11 @@ def get_point_data_from_coordinates(
                 time_subset = f"Time(\"{year:04d}-01-01T00:00:00.000Z\")"
                 date_str = f"{year:04d}-01-01"
             
-            params["subset"] = time_subset
-            url = base_url + urlencode(params)
-            
-            try:
-                response = requests.get(url, auth=auth)
-                
-                if response.status_code == 404:
-                    # No data for this date, advance to next date
-                    if request.temporality == "daily":
-                        current_date += timedelta(days=1)
-                    elif request.temporality == "monthly":
-                        if month == 12:
-                            current_date = current_date.replace(year=year + 1, month=1)
-                        else:
-                            current_date = current_date.replace(month=month + 1)
-                    elif request.temporality == "annual":
-                        current_date = current_date.replace(year=year + 1)
-                    continue
-                    
-                response.raise_for_status()
-                
-                # Process the raster and extract values for each coordinate
-                with MemoryFile(response.content) as memfile:
-                    with memfile.open() as raster:
-                        for coord in request.coordinates:
-                            lon, lat = coord[0], coord[1]
-                            
-                            try:
-                                # Get value from specific point
-                                row, col = raster.index(lon, lat)
-                                value = raster.read(1)[row, col]
-                                
-                                # Filter invalid values
-                                if value != -9999 and not np.isnan(value):
-                                    results.append(PointDataResult(
-                                        coordinate=[lon, lat],
-                                        date=date_str,
-                                        value=float(value)
-                                    ))
-                            except Exception as coord_error:
-                                # Coordinate outside raster bounds, continue
-                                continue
-                                
-            except requests.exceptions.RequestException as req_error:
-                # Error in request for this date, continue
-                continue
+            dates_to_process.append({
+                'date': current_date,
+                'date_str': date_str,
+                'time_subset': time_subset
+            })
             
             # Advance to next date based on temporality
             if request.temporality == "daily":
@@ -143,6 +152,31 @@ def get_point_data_from_coordinates(
             elif request.temporality == "annual":
                 current_date = current_date.replace(year=year + 1)
         
+        # Process dates in parallel
+        all_results = []
+        with ThreadPoolExecutor(max_workers=max_workers) as executor:
+            # Submit all tasks
+            future_to_date = {
+                executor.submit(
+                    process_date_data, 
+                    date_info, 
+                    request.coordinates, 
+                    auth, 
+                    url_root, 
+                    request.workspace, 
+                    request.store
+                ): date_info for date_info in dates_to_process
+            }
+            
+            # Collect results as they complete
+            for future in as_completed(future_to_date):
+                try:
+                    results = future.result()
+                    all_results.extend(results)
+                except Exception as exc:
+                    # Log error but continue processing other dates
+                    continue
+        
         return {
             "request_parameters": {
                 "coordinates": request.coordinates,
@@ -150,10 +184,10 @@ def get_point_data_from_coordinates(
                 "end_date": request.end_date.isoformat(),
                 "workspace": request.workspace,
                 "store": request.store,
-                "temporality": request.temporality
+                "temporality": request.temporality,
             },
-            "total_results": len(results),
-            "data": results
+            "total_results": len(all_results),
+            "data": all_results
         }
         
     except Exception as e:
