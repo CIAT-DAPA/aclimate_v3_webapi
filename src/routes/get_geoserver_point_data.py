@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Query, HTTPException, Depends
+from fastapi import APIRouter, Query, HTTPException
 from typing import List, Dict, Any, Literal
 from pydantic import BaseModel
 from datetime import date, timedelta
@@ -8,7 +8,6 @@ import os
 from urllib.parse import urlencode
 from rasterio.io import MemoryFile
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from dependencies.auth_dependencies import get_current_user
 
 router = APIRouter(tags=["Geoserver Point Data"], prefix="/geoserver")
 
@@ -87,8 +86,7 @@ def process_date_data(date_info: Dict, coordinates: List[List[float]], auth: tup
 
 @router.post("/point-data")
 def get_point_data_from_coordinates(
-    request: PointDataRequest,
-    current_user: dict = Depends(get_current_user)
+    request: PointDataRequest
 ):
     """
     Gets point data from a raster for multiple coordinates within a date range.
