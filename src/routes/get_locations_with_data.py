@@ -42,6 +42,9 @@ class LocationWithData(BaseModel):
     latitude: Optional[float]
     longitude: Optional[float]
     visible: Optional[bool] = True
+    source_id: Optional[int]
+    source_name: Optional[str]
+    source_type: Optional[str]
     admin2_id: Optional[int]
     admin2_name: Optional[str]
     admin2_ext_id: Optional[str]
@@ -92,6 +95,9 @@ def get_locations_with_latest_data(
                 "latitude": loc.latitude,
                 "longitude": loc.longitude,
                 "visible": loc.visible,
+                "source_id": loc.source_id,
+                "source_name": loc.source.name if loc.source else None,
+                "source_type": loc.source.source_type if loc.source else None,
                 "admin2_id": loc.admin_2.id if loc.admin_2 else None,
                 "admin2_name": loc.admin_2.name if loc.admin_2 else None,
                 "admin2_ext_id": loc.admin_2.ext_id if loc.admin_2 else None,
