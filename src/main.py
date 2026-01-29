@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from aclimate_v3_orm.migrations import upgrade, current, downgrade
 from auth.auth import router as auth_router
 from auth.token_validation_router import router as validate_token_router
 from routes.root_redirect import router as root_redirect_router
@@ -27,6 +28,7 @@ from routes.get_climate_historical_indicator import router as get_climate_histor
 
 from routes.get_mng_indicators import router as get_mng_indicators_router
 from routes.get_mng_indicator_categories import router as get_mng_indicator_categories_router
+from routes.get_mng_indicator_features import router as get_mng_indicator_features_router
 from routes.get_country_indicators import router as get_country_indicators_router
 
 from routes.minmax_indicator_by_location import router as minmax_indicator_by_location_router
@@ -115,6 +117,7 @@ app.include_router(get_climate_historical_climatology_date_ranges_router)
 app.include_router(get_climate_historical_indicator_router)
 app.include_router(get_mng_indicators_router)
 app.include_router(get_mng_indicator_categories_router)
+app.include_router(get_mng_indicator_features_router)
 app.include_router(get_country_indicators_router)
 
 app.include_router(minmax_indicator_by_location_router)
@@ -137,5 +140,11 @@ app.include_router(get_geoserver_point_data_router)
 def startup_event():
     print(" Creando tablas al iniciar...")
     create_tables()
+
+def Apply_migrations():
+    print(" Applying migrations...")
+    upgrade()
+    print(" Migrations applied.")
+    
 #startup_event
 #uvicorn main:app --reload
