@@ -4,8 +4,18 @@ from typing import List, Optional
 from pydantic import BaseModel
 from aclimate_v3_orm.services.mng_indicators_service import MngIndicatorService
 from aclimate_v3_orm.services.mng_country_indicator_service import MngCountryIndicatorService
+from aclimate_v3_orm.services.mng_indicators_features_service import MngIndicatorsFeaturesService
 
 from datetime import datetime
+
+class IndicatorFeature(BaseModel):
+    id: int
+    title: str
+    description: Optional[str] = None
+    type: str
+
+    class Config:
+        from_attributes = True
 
 class Indicator(BaseModel):
     id: int
@@ -37,6 +47,13 @@ class Indicator(BaseModel):
                 "updated_at": "2024-01-02T00:00:00Z"
             }
         }
+
+class IndicatorWithFeatures(Indicator):
+    features: Optional[List[IndicatorFeature]] = []
+
+    class Config:
+        from_attributes = True
+
 router = APIRouter(tags=["Indicators"], prefix="/indicator-mng")
 
 @router.get("/by-name", response_model=List[Indicator])
@@ -263,7 +280,7 @@ def get_by_temporality(
         ) for d in data
     ]
 
-@router.get("/by-country", response_model=List[Indicator])
+@router.get("/by-country", response_model=List[IndicatorWithFeatures])
 def get_by_country(
     country_id: int = Query(..., description="Country ID"),
     temporality: Optional[str] = Query(None, description="Indicator temporality (e.g., 'DAILY', 'MONTHLY', 'ANNUAL')"),
@@ -285,11 +302,15 @@ def get_by_country(
         if not country_indicators:
             return []
         
+        # Create a mapping of indicator_id to country_indicator_id for features lookup
+        indicator_to_country_indicator = {ci.indicator_id: ci.id for ci in country_indicators}
+        
         # Extract indicator IDs from country indicators
         indicator_ids = [ci.indicator_id for ci in country_indicators]
 
         # Get full indicator details using MngIndicatorService
         indicator_service = MngIndicatorService()
+        features_service = MngIndicatorsFeaturesService()
         
         # Start with getting all indicators for this country
         all_indicators = []
@@ -315,21 +336,41 @@ def get_by_country(
             
             filtered_indicators.append(indicator)
         
-        return [
-            Indicator(
-                id=d.id,
-                name=d.name,
-                short_name=d.short_name,
-                unit=d.unit,
-                type=d.type,
-                temporality=d.temporality,
-                indicator_category_id=d.indicator_category_id,
-                description=d.description,
-                enable=d.enable,
-                registered_at=d.registered_at,
-                updated_at=d.updated_at
-            ) for d in filtered_indicators
-        ]
+        # Build response with features
+        result = []
+        for d in filtered_indicators:
+            # Get features for this indicator using country_indicator_id
+            country_indicator_id = indicator_to_country_indicator.get(d.id)
+            features_data = []
+            if country_indicator_id:
+                features = features_service.get_by_country_indicator(country_indicator_id)
+                features_data = [
+                    IndicatorFeature(
+                        id=f.id,
+                        title=f.title,
+                        description=f.description,
+                        type=f.type
+                    ) for f in features
+                ]
+            
+            result.append(
+                IndicatorWithFeatures(
+                    id=d.id,
+                    name=d.name,
+                    short_name=d.short_name,
+                    unit=d.unit,
+                    type=d.type,
+                    temporality=d.temporality,
+                    indicator_category_id=d.indicator_category_id,
+                    description=d.description,
+                    enable=d.enable,
+                    registered_at=d.registered_at,
+                    updated_at=d.updated_at,
+                    features=features_data
+                )
+            )
+        
+        return result
         
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Error fetching indicators by country: {str(e)}")
