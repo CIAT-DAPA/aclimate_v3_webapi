@@ -37,6 +37,7 @@ class LocationWithData(BaseModel):
     id: int
     name: str
     ext_id: Optional[str]
+    machine_name: Optional[str]
     enable: Optional[bool]
     altitude: Optional[float]
     latitude: Optional[float]
@@ -90,6 +91,7 @@ def get_locations_with_latest_data(
                 "id": loc.id,
                 "name": loc.name,
                 "ext_id": loc.ext_id,
+                "machine_name": loc.machine_name,
                 "enable": loc.enable,
                 "altitude": loc.altitude,
                 "latitude": loc.latitude,
