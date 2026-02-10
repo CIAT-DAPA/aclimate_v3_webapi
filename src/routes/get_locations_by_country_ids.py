@@ -13,6 +13,7 @@ class Location(BaseModel):
     id: int
     name: str
     ext_id: Optional[str]
+    machine_name: Optional[str]
     enable: Optional[bool]
     altitude: Optional[float]
     latitude: Optional[float]
@@ -35,6 +36,7 @@ class Location(BaseModel):
                 "id": 101,
                 "name": "Test Location",
                 "ext_id": "EXT101",
+                "machine_name": "test_machine_name",
                 "enable": True,
                 "altitude": 2850.0,
                 "latitude": -4.333,
@@ -73,6 +75,7 @@ def get_locations_by_country_ids(
                 "id": loc.id,
                 "name": loc.name,
                 "ext_id": loc.ext_id,
+                "machine_name": loc.machine_name,
                 "enable": loc.enable,
                 "altitude": loc.altitude,
                 "latitude": loc.latitude,

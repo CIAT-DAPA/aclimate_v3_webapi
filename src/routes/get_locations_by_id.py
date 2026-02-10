@@ -23,6 +23,7 @@ def get_locations_by_id(
             "id": location.id,
             "name": location.name,
             "ext_id": location.ext_id,
+            "machine_name": location.machine_name,
             "enable": location.enable,
             "altitude": location.altitude,
             "latitude": location.latitude,

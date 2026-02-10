@@ -27,6 +27,7 @@ def get_locations_by_admin2_ids(
                 "id": loc.id,
                 "name": loc.name,
                 "ext_id": loc.ext_id,
+                "machine_name": loc.machine_name,
                 "enable": loc.enable,
                 "altitude": loc.altitude,
                 "latitude": loc.latitude,
