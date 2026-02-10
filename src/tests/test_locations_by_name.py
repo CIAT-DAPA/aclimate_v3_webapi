@@ -31,8 +31,12 @@ def mock_locations():
             self.admin_1 = admin_1
             self.ext_id = ext_id
 
+    class Source:
+        def __init__(self, name):
+            self.name = name
+
     class Location:
-        def __init__(self, id, name, ext_id, machine_name, visible, admin_2, altitude=100.0, latitude=3.45, longitude=-76.53, source="IDEAM"):
+        def __init__(self, id, name, ext_id, machine_name, visible, admin_2, altitude=100.0, latitude=3.45, longitude=-76.53, source_name="IDEAM"):
             self.id = id
             self.name = name
             self.ext_id = ext_id
@@ -43,7 +47,7 @@ def mock_locations():
             self.latitude = latitude
             self.longitude = longitude
             self.enable = True
-            self.source = source
+            self.source = Source(source_name) if source_name else None
 
     country = Country(1, "Colombia", "CO")
     admin1 = Admin1(10, "Cundinamarca", country, "11")
