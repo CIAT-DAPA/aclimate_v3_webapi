@@ -31,8 +31,12 @@ def mock_locations():
             self.admin_1 = admin_1
             self.ext_id = ext_id
 
+    class Source:
+        def __init__(self, name):
+            self.name = name
+
     class Location:
-        def __init__(self, id, name, ext_id, machine_name, visible, admin_2, altitude=100.0, latitude=3.45, longitude=-76.53):
+        def __init__(self, id, name, ext_id, machine_name, visible, admin_2, altitude=100.0, latitude=3.45, longitude=-76.53, source_name="IDEAM"):
             self.id = id
             self.name = name
             self.ext_id = ext_id
@@ -43,13 +47,14 @@ def mock_locations():
             self.latitude = latitude
             self.longitude = longitude
             self.enable = True
+            self.source = Source(source_name) if source_name else None
 
     country = Country(1, "Colombia", "CO")
     admin1 = Admin1(10, "Cundinamarca", country, "11")
     admin2 = Admin2(20, "Bogotá", admin1, "11001")
 
     return [
-        Location(101, "Test Location", "EXT101", "test_machine_name", True, admin2, 123.45, 4.5, -74.1)
+        Location(101, "Test Location", "EXT101", "test_machine_name", True, admin2, 123.45, 4.5, -74.1, "IDEAM")
     ]
 
 def test_get_locations_by_name(mock_locations):
@@ -76,3 +81,4 @@ def test_get_locations_by_name(mock_locations):
         assert loc["country_name"] == "Colombia"
         assert loc["country_iso2"] == "CO"
         assert loc["machine_name"] == "test_machine_name"
+        assert loc["source"] == "IDEAM"
