@@ -23,6 +23,7 @@ class Location(BaseModel):
     country_id: Optional[int] = None
     country_name: Optional[str] = None
     country_iso2: Optional[str] = None
+    source: Optional[str] = None
 
     class Config:
         from_attributes = True
@@ -45,7 +46,8 @@ class Location(BaseModel):
                 "admin1_ext_id": "REG01",
                 "country_id": 1,
                 "country_name": "Colombia",
-                "country_iso2": "CO"
+                "country_iso2": "CO",
+                "source": "Data Source Name"
             }
         }
 
@@ -76,7 +78,8 @@ def _build_location_response(loc) -> Location:
         admin1_ext_id=loc.admin_2.admin_1.ext_id if loc.admin_2 and loc.admin_2.admin_1 else None,
         country_id=loc.admin_2.admin_1.country.id if loc.admin_2 and loc.admin_2.admin_1 and loc.admin_2.admin_1.country else None,
         country_name=loc.admin_2.admin_1.country.name if loc.admin_2 and loc.admin_2.admin_1 and loc.admin_2.admin_1.country else None,
-        country_iso2=loc.admin_2.admin_1.country.iso2 if loc.admin_2 and loc.admin_2.admin_1 and loc.admin_2.admin_1.country else None
+        country_iso2=loc.admin_2.admin_1.country.iso2 if loc.admin_2 and loc.admin_2.admin_1 and loc.admin_2.admin_1.country else None,
+        source= loc.source.name if loc.source else None
     )
 
 
