@@ -57,6 +57,8 @@ from routes.edit_user import router as edit_user_router
 from routes.delete_rol import router as delete_role_router
 # Geoserver route
 from routes.get_geoserver_point_data import router as get_geoserver_point_data_router
+# Periods route
+from routes.get_available_periods import router as get_available_periods_router
 from fastapi.middleware.cors import CORSMiddleware
 from aclimate_v3_orm.database.base import create_tables
 
@@ -136,6 +138,9 @@ app.include_router(get_climate_historical_daily_by_date_range_and_measures_route
 # Geoserver router
 app.include_router(get_geoserver_point_data_router)
 
+# Periods router
+app.include_router(get_available_periods_router)
+
 
 def startup_event():
     print(" Creando tablas al iniciar...")
@@ -147,4 +152,5 @@ def Apply_migrations():
     print(" Migrations applied.")
     
 #startup_event
+#Apply_migrations()
 #uvicorn main:app --reload
