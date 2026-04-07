@@ -1,64 +1,14 @@
 from fastapi import APIRouter, Query
 from aclimate_v3_orm.services.mng_location_service import MngLocationService
 from aclimate_v3_orm.services.climate_historical_daily_service import ClimateHistoricalDailyService
-from typing import List, Optional, Dict, Any
-from pydantic import BaseModel
+from typing import List
 from datetime import datetime
+from schemas.location import MeasureData, LatestData, LocationWithData
 
 router = APIRouter(
     prefix="/locations",
     tags=["Locations"]
 )
-
-
-class MeasureData(BaseModel):
-    """Climate measure data"""
-    measure_id: int
-    measure_name: str
-    measure_short_name: str
-    measure_unit: Optional[str]
-    value: Optional[float]
-
-    class Config:
-        from_attributes = True
-
-
-class LatestData(BaseModel):
-    """Latest monitoring data for a location"""
-    date: Optional[str]
-    measures: List[MeasureData] = []
-
-    class Config:
-        from_attributes = True
-
-
-class LocationWithData(BaseModel):
-    """Location with its latest monitoring data"""
-    id: int
-    name: str
-    ext_id: Optional[str]
-    machine_name: Optional[str]
-    enable: Optional[bool]
-    altitude: Optional[float]
-    latitude: Optional[float]
-    longitude: Optional[float]
-    visible: Optional[bool] = True
-    source_id: Optional[int]
-    source_name: Optional[str]
-    source_type: Optional[str]
-    admin2_id: Optional[int]
-    admin2_name: Optional[str]
-    admin2_ext_id: Optional[str]
-    admin1_id: Optional[int]
-    admin1_name: Optional[str]
-    admin1_ext_id: Optional[str]
-    country_id: int
-    country_name: Optional[str]
-    country_iso2: Optional[str]
-    latest_data: Optional[LatestData]
-
-    class Config:
-        from_attributes = True
 
 
 @router.get(

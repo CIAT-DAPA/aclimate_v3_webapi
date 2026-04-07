@@ -1,8 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException
-from pydantic import BaseModel
 import os
 import httpx
 from dependencies.auth_dependencies import require_roles
+from schemas.auth import DeleteUserRequest
 
 router = APIRouter(
     prefix="/users",
@@ -32,10 +32,6 @@ async def get_admin_token():
     if response.status_code != 200:
         raise HTTPException(status_code=401, detail="Failed to obtain admin token")
     return response.json()["access_token"]
-
-
-class DeleteUserRequest(BaseModel):
-    user_id: str
 
 
 @router.delete("/delete-user", summary="Delete a user from Keycloak by ID")
