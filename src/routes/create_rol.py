@@ -1,18 +1,13 @@
 from fastapi import APIRouter, Depends, HTTPException
-from pydantic import BaseModel
 import os
 import httpx
 from dependencies.auth_dependencies import require_roles
+from schemas.auth import CreateRoleRequest
 
 router = APIRouter(
     prefix="/roles",
     tags=["Webadmin"]
 )
-
-class CreateRoleRequest(BaseModel):
-    name: str
-    description: str | None = None
-    composite: bool = False
 
 async def get_admin_token():
     KEYCLOAK_URL = os.getenv("KEYCLOAK_URL")

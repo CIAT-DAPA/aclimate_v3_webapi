@@ -1,9 +1,9 @@
 from fastapi import APIRouter, Depends, HTTPException
-from pydantic import BaseModel
 from typing import List, Optional, Dict
 import os
 import httpx
-from dependencies.auth_dependencies import require_roles  # Your existing validator
+from dependencies.auth_dependencies import require_roles
+from schemas.auth import Credential, UserCreateRequest
 
 router = APIRouter(
     prefix="/users",
@@ -15,23 +15,6 @@ KEYCLOAK_URL = os.getenv("KEYCLOAK_URL")
 REALM_NAME = os.getenv("REALM_NAME")
 CLIENT_ID = os.getenv("CLIENT_ID")
 CLIENT_SECRET = os.getenv("CLIENT_SECRET")
-
-
-class Credential(BaseModel):
-    type: str = "password"
-    value: str
-    temporary: bool = False
-
-
-class UserCreateRequest(BaseModel):
-    username: str
-    email: str
-    firstName: Optional[str] = ""
-    lastName: Optional[str] = ""
-    emailVerified: Optional[bool] = False
-    enabled: Optional[bool] = True
-    attributes: Optional[Dict[str, str]] = None
-    credentials: List[Credential]
 
 
 async def get_admin_token():

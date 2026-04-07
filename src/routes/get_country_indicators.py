@@ -1,32 +1,7 @@
 from fastapi import APIRouter, Query, HTTPException
-from typing import List, Optional, Dict
-from pydantic import BaseModel
+from typing import List
 from aclimate_v3_orm.services.mng_country_indicator_service import MngCountryIndicatorService
-
-class CountryIndicator(BaseModel):
-    id: int
-    country_id: int
-    indicator_id: int
-    spatial_forecast: bool
-    spatial_climate: bool
-    location_forecast: bool
-    location_climate: bool
-    criteria: Optional[Dict] = None
-
-    class Config:
-        from_attributes = True
-        json_schema_extra = {
-            "example": {
-                "id": 1,
-                "country_id": 1,
-                "indicator_id": 2,
-                "spatial_forecast": True,
-                "spatial_climate": False,
-                "location_forecast": True,
-                "location_climate": True,
-                "criteria": {"admin_level": 2, "threshold": 0.5}
-            }
-        }
+from schemas.mng import CountryIndicator
 
 router = APIRouter(tags=["Country Indicators"], prefix="/country-indicator")
 

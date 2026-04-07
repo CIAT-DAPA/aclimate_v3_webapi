@@ -1,37 +1,10 @@
 from fastapi import APIRouter, Query
-from typing import List, Optional
+from typing import List
 from datetime import date
 from aclimate_v3_orm.services import ClimateHistoricalDailyService
-from pydantic import BaseModel
+from schemas.climate import ClimateHistoricalDaily
 
 router = APIRouter(tags=["Climate Historical Daily"], prefix="/historical-daily")
-
-class ClimateHistoricalDaily(BaseModel):
-    id: int
-    location_id: int
-    location_name: Optional[str]
-    measure_id: Optional[int]
-    measure_name: Optional[str]
-    measure_short_name: Optional[str]
-    measure_unit: Optional[str]
-    date: date
-    value: float
-
-    class Config:
-        from_attributes = True
-        json_schema_extra = {
-            "example": {
-                "id": 1,
-                "location_id": 123,
-                "location_name": "Test Location",
-                "measure_id": 5,
-                "measure_name": "Precipitación",
-                "measure_short_name": "m1",
-                "measure_unit": "mm",
-                "date": "2025-05-05",
-                "value": 12.34
-            }
-        }
 
 @router.get("/by-date-range", response_model=List[ClimateHistoricalDaily], summary="Get Climate Historical Daily Data by Date Range")
 def get_by_date_range(

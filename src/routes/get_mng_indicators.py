@@ -1,58 +1,12 @@
 
 from fastapi import APIRouter, Query, HTTPException, Depends
 from typing import List, Optional
-from pydantic import BaseModel
 from aclimate_v3_orm.services.mng_indicators_service import MngIndicatorService
 from aclimate_v3_orm.services.mng_country_indicator_service import MngCountryIndicatorService
 from aclimate_v3_orm.services.mng_indicators_features_service import MngIndicatorsFeaturesService
+from schemas.mng import Indicator, IndicatorFeature, IndicatorWithFeatures
 
 from datetime import datetime
-
-class IndicatorFeature(BaseModel):
-    id: int
-    title: str
-    description: Optional[str] = None
-    type: str
-
-    class Config:
-        from_attributes = True
-
-class Indicator(BaseModel):
-    id: int
-    name: str
-    short_name: str
-    unit: str
-    type: str
-    temporality: str
-    indicator_category_id: int
-    description: Optional[str] = None
-    enable: bool
-    registered_at: Optional[datetime] = None
-    updated_at: Optional[datetime] = None
-
-    class Config:
-        from_attributes = True
-        json_schema_extra = {
-            "example": {
-                "id": 1,
-                "name": "consecutive_rainy_days",
-                "short_name": "crd",
-                "unit": "days",
-                "type": "CLIMATE",
-                "temporality": "MONTHLY",
-                "indicator_category_id": 1,
-                "description": "Consecutive rainy days indicator",
-                "enable": True,
-                "registered_at": "2024-01-01T00:00:00Z",
-                "updated_at": "2024-01-02T00:00:00Z"
-            }
-        }
-
-class IndicatorWithFeatures(Indicator):
-    features: Optional[List[IndicatorFeature]] = []
-
-    class Config:
-        from_attributes = True
 
 router = APIRouter(tags=["Indicators"], prefix="/indicator-mng")
 

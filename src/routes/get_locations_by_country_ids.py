@@ -1,58 +1,12 @@
 from fastapi import APIRouter, Query
 from aclimate_v3_orm.services.mng_location_service import MngLocationService
-from typing import List, Optional
-from pydantic import BaseModel
+from typing import List
+from schemas.location import Location
 
 router = APIRouter(
     prefix="/locations",
     tags=["Locations"]
 )
-
-
-class Location(BaseModel):
-    id: int
-    name: str
-    ext_id: Optional[str]
-    machine_name: Optional[str]
-    enable: Optional[bool]
-    altitude: Optional[float]
-    latitude: Optional[float]
-    longitude: Optional[float]
-    visible: Optional[bool] = True
-    admin2_id: Optional[int]
-    admin2_name: Optional[str]
-    admin2_ext_id: Optional[str]
-    admin1_id: Optional[int]
-    admin1_name: Optional[str]
-    admin1_ext_id: Optional[str]
-    country_id: int
-    country_name: Optional[str]
-    country_iso2: Optional[str]
-
-    class Config:
-        from_attributes = True
-        json_schema_extra = {
-            "example": {
-                "id": 101,
-                "name": "Test Location",
-                "ext_id": "EXT101",
-                "machine_name": "test_machine_name",
-                "enable": True,
-                "altitude": 2850.0,
-                "latitude": -4.333,
-                "longitude": -74.55,
-                "visible": True,
-                "admin2_id": 20,
-                "admin2_name": "Bogotá",
-                "admin2_ext_id": "11001",
-                "admin1_id": 10,
-                "admin1_name": "Cundinamarca",
-                "admin1_ext_id": "11",
-                "country_id": 1,
-                "country_name": "Colombia",
-                "country_iso2": "CO"
-            }
-        }
 
 
 @router.get("/by-country-ids", response_model=List[Location], summary="Get locations by country IDs")
@@ -89,7 +43,8 @@ def get_locations_by_country_ids(
                 "admin1_ext_id": loc.admin_2.admin_1.ext_id if loc.admin_2 and loc.admin_2.admin_1 and loc.admin_2.admin_1.ext_id else None,
                 "country_id": loc.admin_2.admin_1.country.id if loc.admin_2 and loc.admin_2.admin_1 and loc.admin_2.admin_1.country else country_id,
                 "country_name": loc.admin_2.admin_1.country.name if loc.admin_2 and loc.admin_2.admin_1 and loc.admin_2.admin_1.country else None,
-                "country_iso2": loc.admin_2.admin_1.country.iso2 if loc.admin_2 and loc.admin_2.admin_1 and loc.admin_2.admin_1.country else None
+                "country_iso2": loc.admin_2.admin_1.country.iso2 if loc.admin_2 and loc.admin_2.admin_1 and loc.admin_2.admin_1.country else None,
+                "source": loc.source.name if loc.source else None
             }
             result.append(flat_loc)
     

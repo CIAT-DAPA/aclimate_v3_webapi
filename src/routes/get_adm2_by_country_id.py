@@ -1,39 +1,12 @@
 from fastapi import APIRouter, Depends, Query
 from aclimate_v3_orm.services.mng_admin_2_service import MngAdmin2Service
 from typing import List
-from pydantic import BaseModel
+from schemas.location import Admin2
 
 router = APIRouter(
     prefix="/admin2",
     tags=["Admin levels"]
 )
-
-class Admin2(BaseModel):
-    id: int
-    name: str
-    ext_id: str
-    admin1_id: int | None
-    admin1_name: str | None
-    admin1_ext_id: str | None
-    country_id: int | None
-    country_name: str | None
-    country_iso2: str | None
-
-    class Config:
-        from_attributes = True
-        json_schema_extra = {
-            "example": {
-                "id": 302,
-                "name": "Valle del Cauca",
-                "ext_id": "76201",
-                "admin1_id": 101,
-                "admin1_name": "Pacífico",
-                "admin1_ext_id": "76",
-                "country_id": 1,
-                "country_name": "Colombia",
-                "country_iso2": "CO"
-            }
-        }
 
 @router.get("/by-country-ids", response_model=List[Admin2])
 def get_admin2_by_country_ids(

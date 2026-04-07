@@ -1,6 +1,5 @@
 from fastapi import APIRouter, Query, HTTPException
-from typing import List, Dict, Any, Literal
-from pydantic import BaseModel
+from typing import List, Dict, Any
 from datetime import date, timedelta
 import requests
 import numpy as np
@@ -8,25 +7,9 @@ import os
 from urllib.parse import urlencode
 from rasterio.io import MemoryFile
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from schemas.geoserver import Coordinate, PointDataRequest, PointDataResult
 
 router = APIRouter(tags=["Geoserver Point Data"], prefix="/geoserver")
-
-class Coordinate(BaseModel):
-    lon: float
-    lat: float
-
-class PointDataRequest(BaseModel):
-    coordinates: List[List[float]]  # [[lon, lat], [lon, lat]]
-    start_date: date
-    end_date: date
-    workspace: str
-    store: str
-    temporality: Literal["daily", "monthly", "annual"] = "daily"
-
-class PointDataResult(BaseModel):
-    coordinate: List[float]  # [lon, lat]
-    date: str
-    value: float
 
 def process_date_data(date_info: Dict, coordinates: List[List[float]], auth: tuple, url_root: str, workspace: str, store: str) -> List[PointDataResult]:
     """

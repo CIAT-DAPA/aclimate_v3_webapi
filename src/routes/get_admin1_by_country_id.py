@@ -1,35 +1,13 @@
 from fastapi import APIRouter, Query, Depends
-from typing import List, Optional
-from pydantic import BaseModel
+from typing import List
 from aclimate_v3_orm.services.mng_admin_1_service import MngAdmin1Service
-from dependencies.auth_dependencies import get_current_user  
+from dependencies.auth_dependencies import get_current_user
+from schemas.location import Admin1
 
 router = APIRouter(
     prefix="/admin1",
     tags=["Admin levels"]
 )
-
-
-class Admin1(BaseModel):
-    id: int
-    name: str
-    ext_id: str
-    country_id: int
-    country_name: str
-    country_iso2: str
-
-    class Config:
-        from_attributes = True
-        json_schema_extra = {
-            "example": {
-                "id": 101,
-                "name": "Antioquia",
-                "ext_id": "05",
-                "country_id": 1,
-                "country_name": "Colombia",
-                "country_iso2": "CO"
-            }
-        }
 
 
 @router.get("/by-country-ids", response_model=List[Admin1])

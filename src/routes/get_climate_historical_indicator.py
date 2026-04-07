@@ -1,40 +1,8 @@
-
 from fastapi import APIRouter, Query, HTTPException
-from typing import List, Optional
-from pydantic import BaseModel
+from typing import List
 from datetime import datetime
 from aclimate_v3_orm.services.climate_historical_indicator_service import ClimateHistoricalIndicatorService
-
-class ClimateHistoricalIndicatorRecord(BaseModel):
-    id: int
-    indicator_id: int
-    indicator_name: Optional[str] = None
-    indicator_short_name: Optional[str] = None
-    indicator_unit: Optional[str] = None
-    location_id: int
-    location_name: Optional[str] = None
-    value: float
-    period: Optional[str] = None
-    start_date: Optional[datetime] = None
-    end_date: Optional[datetime] = None
-
-    class Config:
-        from_attributes = True
-        json_schema_extra = {
-            "example": {
-                "id": 1,
-                "indicator_id": 2,
-                "indicator_name": "consecutive_rainy_days",
-                "indicator_short_name": "crd",
-                "indicator_unit": "days",
-                "location_id": 10,
-                "location_name": "Palmira",
-                "value": 5.0,
-                "period": "monthly",
-                "start_date": "2024-01-01T00:00:00Z",
-                "end_date": "2024-01-31T00:00:00Z"
-            }
-        }
+from schemas.climate import ClimateHistoricalIndicatorRecord
 
 router = APIRouter(tags=["Climate Historical Indicator"], prefix="/indicator")
 
