@@ -1,32 +1,11 @@
 from fastapi import APIRouter, Query, HTTPException, Depends, Path
-from typing import List, Optional
-from pydantic import BaseModel
+from typing import List
 from aclimate_v3_orm.services.mng_indicator_category_service import MngIndicatorCategoryService
 from aclimate_v3_orm.services.mng_country_indicator_service import MngCountryIndicatorService
 from aclimate_v3_orm.services.mng_indicators_service import MngIndicatorService
+from schemas.mng import IndicatorCategory
 
 from datetime import datetime
-
-class IndicatorCategory(BaseModel):
-    id: int
-    name: str
-    description: Optional[str] = None
-    enable: bool
-    registered_at: Optional[datetime] = None
-    updated_at: Optional[datetime] = None
-
-    class Config:
-        from_attributes = True
-        json_schema_extra = {
-            "example": {
-                "id": 1,
-                "name": "Climate",
-                "description": "Climate-related indicators",
-                "enable": True,
-                "registered_at": "2024-01-01T00:00:00Z",
-                "updated_at": "2024-01-02T00:00:00Z"
-            }
-        }
 
 router = APIRouter(tags=["Indicator Categories"], prefix="/indicator-category-mng")
 

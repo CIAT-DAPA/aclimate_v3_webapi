@@ -1,37 +1,9 @@
 from fastapi import APIRouter, Query
-from typing import List, Optional
-from pydantic import BaseModel
+from typing import List
 from aclimate_v3_orm.services.climate_historical_climatology_service import ClimateHistoricalClimatologyService
+from schemas.climate import ClimateHistoricalClimatology
 
 router = APIRouter(tags=["Climate Historical Climatology"], prefix="/climatology")
-
-
-class ClimateHistoricalClimatology(BaseModel):
-    id: int
-    location_id: int
-    location_name: Optional[str]
-    measure_id: Optional[int]
-    measure_name: Optional[str]
-    measure_short_name: Optional[str]
-    measure_unit: Optional[str]
-    month: int
-    value: float
-
-    class Config:
-        from_attributes = True
-        json_schema_extra = {
-            "example": {
-                "id": 1,
-                "location_id": 456,
-                "location_name": "Sample Location",
-                "measure_id": 4,
-                "measure_name": "Temperatura Máxima",
-                "measure_short_name": "tmax",
-                "measure_unit": "°C",
-                "month": 5,
-                "value": 32.7
-            }
-        }
 
 
 @router.get(

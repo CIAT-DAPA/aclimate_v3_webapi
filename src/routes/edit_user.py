@@ -1,21 +1,13 @@
 from fastapi import APIRouter, Depends, HTTPException
-from pydantic import BaseModel, EmailStr
 import requests
 import os
 from dependencies.auth_dependencies import require_roles
+from schemas.auth import SafeUserUpdate
 
 router = APIRouter(
     prefix="/users",
     tags=["Webadmin"]
 )
-
-class SafeUserUpdate(BaseModel):
-    firstName: str | None = None
-    lastName: str | None = None
-    email: EmailStr | None = None
-    emailVerified: bool | None = None
-    enabled: bool | None = None
-
 
 # 🧽 Limpiador de payload
 def sanitize_user_payload(data: dict) -> dict:

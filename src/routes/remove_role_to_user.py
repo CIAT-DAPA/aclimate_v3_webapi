@@ -1,18 +1,13 @@
 from fastapi import APIRouter, Depends, HTTPException
-from pydantic import BaseModel
 import os
 import httpx
 from dependencies.auth_dependencies import require_roles
+from schemas.auth import RoleRemovalByIdRequest
 
 router = APIRouter(
     prefix="/users",
     tags=["Webadmin"]
 )
-
-class RoleRemovalByIdRequest(BaseModel):
-    user_id: str
-    role_id: str
-
 
 async def get_admin_token():
     KEYCLOAK_URL = os.getenv("KEYCLOAK_URL")
