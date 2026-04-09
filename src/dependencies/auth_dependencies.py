@@ -3,6 +3,7 @@ from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from jose import jwt, JWTError, ExpiredSignatureError
 import requests
 import os
+import time
 from dotenv import load_dotenv
 from typing import List
 
@@ -11,15 +12,41 @@ load_dotenv()
 
 security = HTTPBearer()
 
+# JWKS cache: stores {"keys": [...], "cached_at": float}
+_jwks_cache: dict = {}
+_JWKS_TTL_SECONDS = int(os.getenv("JWKS_TTL_SECONDS", 300))
+
+
 def get_jwks():
     keycloak_url = os.getenv("KEYCLOAK_URL", "http://localhost:8080")
     realm_name = os.getenv("REALM_NAME", "aclimate")
-    jwks_url = f"{keycloak_url}/realms/{realm_name}/protocol/openid-connect/certs"
 
-    response = requests.get(jwks_url)
+    now = time.monotonic()
+    if _jwks_cache.get("keys") and now - _jwks_cache.get("cached_at", 0) < _JWKS_TTL_SECONDS:
+        return {"keys": _jwks_cache["keys"]}
+
+    jwks_url = f"{keycloak_url}/realms/{realm_name}/protocol/openid-connect/certs"
+    response = requests.get(jwks_url, timeout=10)
     if response.status_code != 200:
         raise HTTPException(status_code=500, detail="No se pudo obtener las claves públicas (JWKS)")
-    return response.json()
+
+    data = response.json()
+    _jwks_cache["keys"] = data["keys"]
+    _jwks_cache["cached_at"] = now
+    return data
+
+
+def _resolve_token_type(payload: dict) -> str:
+    """Detect whether the token was issued for a human user or a service client.
+
+    Keycloak sets preferred_username to 'service-account-<client_id>' for
+    client_credentials grants, and to the actual username for password grants.
+    """
+    preferred_username = payload.get("preferred_username", "")
+    if preferred_username.startswith("service-account-"):
+        return "client"
+    return "user"
+
 
 def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security)) -> dict:
     token = credentials.credentials
@@ -41,12 +68,14 @@ def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(securit
             audience="account",
             issuer=f"{keycloak_url}/realms/{realm_name}",
         )
+        payload["token_type"] = _resolve_token_type(payload)
         return payload
 
     except ExpiredSignatureError:
         raise HTTPException(status_code=401, detail="Token expirado")
     except JWTError as e:
         raise HTTPException(status_code=401, detail=f"Token inválido: {str(e)}")
+
 
 def require_roles(required_roles: List[str]):
     def role_checker(current_user: dict = Depends(get_current_user)):

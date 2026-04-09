@@ -25,6 +25,7 @@ def test_get_all_countries(mock_countries_data):
     mock_user = {
         "sub": "user123",
         "preferred_username": "mockuser",
+        "token_type": "user",
         "resource_access": {
             "dummy-client": {
                 "roles": ["admin"]
