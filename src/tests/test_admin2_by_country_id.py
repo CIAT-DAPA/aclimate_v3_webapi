@@ -6,17 +6,8 @@ from unittest.mock import patch
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from main import app
-from dependencies.auth_dependencies import get_current_user
 
 client = TestClient(app)
-
-_MOCK_USER = {"sub": "user123", "preferred_username": "mockuser", "token_type": "user"}
-
-@pytest.fixture(autouse=True)
-def mock_auth():
-    app.dependency_overrides[get_current_user] = lambda: _MOCK_USER
-    yield
-    app.dependency_overrides = {}
 
 @pytest.fixture
 def mock_admin2_data():

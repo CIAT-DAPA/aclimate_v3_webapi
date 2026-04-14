@@ -37,7 +37,6 @@ def test_get_admin1_by_country_ids(mock_admin1_data):
     mock_user = {
         "sub": "user123",
         "preferred_username": "mockuser",
-        "token_type": "user",
         "resource_access": {
             "dummy-client": {
                 "roles": ["admin"]

@@ -1,6 +1,5 @@
-from fastapi import FastAPI, Depends
+from fastapi import FastAPI
 from aclimate_v3_orm.migrations import upgrade, current, downgrade
-from dependencies.auth_dependencies import get_current_user
 from auth.auth import router as auth_router
 from auth.token_validation_router import router as validate_token_router
 from routes.root_redirect import router as root_redirect_router
@@ -78,8 +77,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-_auth = [Depends(get_current_user)]
-
 # Routers
 app.include_router(root_redirect_router)
 app.include_router(auth_router)
@@ -95,54 +92,54 @@ app.include_router(get_user_by_id_router)
 app.include_router(edit_user_router)
 app.include_router(delete_role_router)
 
-app.include_router(get_all_countries_router, dependencies=_auth)
-app.include_router(get_countries_by_name_router, dependencies=_auth)
-app.include_router(get_admin1_by_country_id_router, dependencies=_auth)
-app.include_router(get_admin1_by_adm1_name_router, dependencies=_auth)
+app.include_router(get_all_countries_router)
+app.include_router(get_countries_by_name_router)
+app.include_router(get_admin1_by_country_id_router)
+app.include_router(get_admin1_by_adm1_name_router)
 
-app.include_router(get_adm2_by_adm1_id_router, dependencies=_auth)
-app.include_router(get_adm2_by_country_id_router, dependencies=_auth)
-app.include_router(get_adm2_by_name_router, dependencies=_auth)
-app.include_router(get_locations_by_country_ids_router, dependencies=_auth)
-app.include_router(get_locations_by_adm2_ids_router, dependencies=_auth)
-app.include_router(get_locations_by_name_router, dependencies=_auth)
-app.include_router(get_locations_by_id_router, dependencies=_auth)
-app.include_router(get_locations_with_latest_data_router, dependencies=_auth)
-app.include_router(get_climate_historical_daily_date_ranges_router, dependencies=_auth)
+app.include_router(get_adm2_by_adm1_id_router)
+app.include_router(get_adm2_by_country_id_router)
+app.include_router(get_adm2_by_name_router)
+app.include_router(get_locations_by_country_ids_router)
+app.include_router(get_locations_by_adm2_ids_router)
+app.include_router(get_locations_by_name_router)
+app.include_router(get_locations_by_id_router)
+app.include_router(get_locations_with_latest_data_router)
+app.include_router(get_climate_historical_daily_date_ranges_router)
 
-app.include_router(get_climate_historical_daily_by_date_router, dependencies=_auth)
-app.include_router(get_climate_historical_daily_by_date_range_router, dependencies=_auth)
-app.include_router(get_climate_historical_monthly_date_ranges_router, dependencies=_auth)
-app.include_router(get_climate_historical_monthly_by_country_name_router, dependencies=_auth)
-app.include_router(get_climate_historical_monthly_by_adm1_name_router, dependencies=_auth)
-app.include_router(get_climate_historical_monthly_by_date_router, dependencies=_auth)
-app.include_router(get_climate_historical_monthly_by_date_range_router, dependencies=_auth)
-app.include_router(get_climate_historical_climatology_date_ranges_router, dependencies=_auth)
+app.include_router(get_climate_historical_daily_by_date_router)
+app.include_router(get_climate_historical_daily_by_date_range_router)
+app.include_router(get_climate_historical_monthly_date_ranges_router)
+app.include_router(get_climate_historical_monthly_by_country_name_router)
+app.include_router(get_climate_historical_monthly_by_adm1_name_router)
+app.include_router(get_climate_historical_monthly_by_date_router)
+app.include_router(get_climate_historical_monthly_by_date_range_router)
+app.include_router(get_climate_historical_climatology_date_ranges_router)
 
-app.include_router(get_climate_historical_indicator_router, dependencies=_auth)
-app.include_router(get_mng_indicators_router, dependencies=_auth)
-app.include_router(get_mng_indicator_categories_router, dependencies=_auth)
-app.include_router(get_mng_indicator_features_router, dependencies=_auth)
-app.include_router(get_country_indicators_router, dependencies=_auth)
+app.include_router(get_climate_historical_indicator_router)
+app.include_router(get_mng_indicators_router)
+app.include_router(get_mng_indicator_categories_router)
+app.include_router(get_mng_indicator_features_router)
+app.include_router(get_country_indicators_router)
 
-app.include_router(minmax_indicator_by_location_router, dependencies=_auth)
-app.include_router(minmax_daily_by_location_router, dependencies=_auth)
-app.include_router(minmax_monthly_by_location_router, dependencies=_auth)
-app.include_router(minmax_climatology_by_location_router, dependencies=_auth)
+app.include_router(minmax_indicator_by_location_router)
+app.include_router(minmax_daily_by_location_router)
+app.include_router(minmax_monthly_by_location_router)
+app.include_router(minmax_climatology_by_location_router)
 
-app.include_router(get_climate_historical_climatology_by_location_name_router, dependencies=_auth)
-app.include_router(get_climate_historical_climatology_by_specific_month_router, dependencies=_auth)
-app.include_router(get_climate_historical_climatology_by_month_router, dependencies=_auth)
-app.include_router(get_climate_historical_climatology_by_measure_name_router, dependencies=_auth)
+app.include_router(get_climate_historical_climatology_by_location_name_router)
+app.include_router(get_climate_historical_climatology_by_specific_month_router)
+app.include_router(get_climate_historical_climatology_by_month_router)
+app.include_router(get_climate_historical_climatology_by_measure_name_router)
 app.include_router(get_client_token_router)
-app.include_router(get_climate_historical_daily_by_date_ranges_and_all_measures_router, dependencies=_auth)
-app.include_router(get_climate_historical_daily_by_date_range_and_measures_router, dependencies=_auth)
+app.include_router(get_climate_historical_daily_by_date_ranges_and_all_measures_router)
+app.include_router(get_climate_historical_daily_by_date_range_and_measures_router)
 
 # Geoserver router
-app.include_router(get_geoserver_point_data_router, dependencies=_auth)
+app.include_router(get_geoserver_point_data_router)
 
 # Periods router
-app.include_router(get_available_periods_router, dependencies=_auth)
+app.include_router(get_available_periods_router)
 
 
 def startup_event():
