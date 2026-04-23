@@ -103,6 +103,21 @@ class Indicator(BaseModel):
         }
 
 
+class PeriodResponse(BaseModel):
+    value: str
+    label: str
+    has_data: bool
+
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "value": "annual",
+                "label": "Annual",
+                "has_data": True
+            }
+        }
+
+
 class IndicatorWithFeatures(Indicator):
     features: Optional[List[IndicatorFeature]] = []
 

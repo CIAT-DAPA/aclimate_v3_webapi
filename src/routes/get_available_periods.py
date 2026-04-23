@@ -1,24 +1,10 @@
 from fastapi import APIRouter
 from typing import List
-from pydantic import BaseModel
 from sqlalchemy import exists
 from sqlalchemy.orm import Session
 from aclimate_v3_orm.database import SessionLocal
 from aclimate_v3_orm.models.climate_historical_indicator import ClimateHistoricalIndicator
-
-class PeriodResponse(BaseModel):
-    value: str
-    label: str
-    has_data: bool
-
-    class Config:
-        json_schema_extra = {
-            "example": {
-                "value": "annual",
-                "label": "Annual",
-                "has_data": True
-            }
-        }
+from schemas.mng import PeriodResponse
 
 router = APIRouter(tags=["Periods"], prefix="/periods")
 

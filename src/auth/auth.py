@@ -5,8 +5,9 @@ from pydantic import BaseModel
 import requests
 import os
 from dotenv import load_dotenv
+from pathlib import Path
 
-load_dotenv()
+load_dotenv(Path(__file__).parent.parent / ".env")
 
 
 
@@ -52,6 +53,10 @@ def login(data: LoginRequest):
     response = requests.post(token_url, data=payload, headers=headers)
 
     if response.status_code != 200:
-        raise HTTPException(status_code=401, detail=response.json())
+        try:
+            detail = response.json()
+        except Exception:
+            detail = response.text or "Authentication failed"
+        raise HTTPException(status_code=401, detail=detail)
 
     return response.json()
