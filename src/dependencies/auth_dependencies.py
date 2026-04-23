@@ -7,10 +7,11 @@ import time
 import logging
 from dotenv import load_dotenv
 from typing import List
+from pathlib import Path
 
 logger = logging.getLogger(__name__)
 
-load_dotenv()
+load_dotenv(Path(__file__).parent.parent / ".env")
 
 
 security = HTTPBearer()
