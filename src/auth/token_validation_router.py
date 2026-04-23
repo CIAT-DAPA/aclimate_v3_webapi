@@ -4,9 +4,8 @@ from jose import jwt, JWTError, ExpiredSignatureError
 import requests
 import os
 from dotenv import load_dotenv
-from pathlib import Path
 
-load_dotenv(Path(__file__).parent.parent / ".env")
+load_dotenv()
 
 
 router = APIRouter(tags=["Authentication"], prefix="/auth")
