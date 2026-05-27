@@ -9,45 +9,27 @@ from datetime import datetime
 
 router = APIRouter(tags=["Indicator Categories"], prefix="/indicator-category-mng")
 
-@router.get("/by-name", response_model=IndicatorCategory)
-def get_by_name(
-    name: str = Query(..., description="Category name")
-):
-    """
-    Returns category filtered by exact name.
-    - **name**: Name of the category to filter by (e.g., 'Extreme Temperature', 'Heat Stress').
-    """
-    service = MngIndicatorCategoryService()
-    data = service.get_by_name(name)
-    if not data:
-        raise HTTPException(status_code=404, detail=f"Category with name '{name}' not found")
-    
-    return IndicatorCategory(
-        id=data.id,
-        name=data.name,
-        description=data.description,
-        enable=data.enable,
-        registered_at=data.registered_at,
-        updated_at=data.updated_at
-    )
-
-@router.get("/all", response_model=List[IndicatorCategory])
-def get_all():
-    """
-    Returns all indicator categories.
-    """
-    service = MngIndicatorCategoryService()
-    data = service.get_all()
-    return [
-        IndicatorCategory(
-            id=d.id,
-            name=d.name,
-            description=d.description,
-            enable=d.enable,
-            registered_at=d.registered_at,
-            updated_at=d.updated_at
-        ) for d in data
-    ]
+# @router.get("/by-name", response_model=IndicatorCategory)
+# def get_by_name(
+#     name: str = Query(..., description="Category name")
+# ):
+#     """
+#     Returns category filtered by exact name.
+#     - **name**: Name of the category to filter by (e.g., 'Extreme Temperature', 'Heat Stress').
+#     """
+#     service = MngIndicatorCategoryService()
+#     data = service.get_by_name(name)
+#     if not data:
+#         raise HTTPException(status_code=404, detail=f"Category with name '{name}' not found")
+#     
+#     return IndicatorCategory(
+#         id=data.id,
+#         name=data.name,
+#         description=data.description,
+#         enable=data.enable,
+#         registered_at=data.registered_at,
+#         updated_at=data.updated_at
+#     )
 
 
 @router.get("/by-category", response_model=IndicatorCategory)

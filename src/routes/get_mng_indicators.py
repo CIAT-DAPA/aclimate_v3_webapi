@@ -1,34 +1,163 @@
 
 from fastapi import APIRouter, Query, HTTPException, Depends
 from typing import List, Optional
+from aclimate_v3_orm.services.mng_indicator_category_service import MngIndicatorCategoryService
 from aclimate_v3_orm.services.mng_indicators_service import MngIndicatorService
 from aclimate_v3_orm.services.mng_country_indicator_service import MngCountryIndicatorService
 from aclimate_v3_orm.services.mng_indicators_features_service import MngIndicatorsFeaturesService
-from schemas.mng import Indicator, IndicatorFeature, IndicatorWithFeatures
+from schemas.mng import Indicator, IndicatorFeature, IndicatorWithFeatures, IndicatorCategory
 
 from datetime import datetime
 
 router = APIRouter(tags=["Indicators"], prefix="/indicator-mng")
 
-@router.get("/by-name", response_model=List[Indicator])
-def get_by_name(
-    name: str = Query(..., description="Indicator name")
-):
+# @router.get("/by-name", response_model=List[Indicator])
+# def get_by_name(
+#     name: str = Query(..., description="Indicator name")
+# ):
+#     """
+#     Returns indicators filtered by exact name.
+#     - **name**: Name of the indicator to filter by (e.g., 'consecutive_rainy_days').
+#     """
+#     service = MngIndicatorService()
+#     data = service.get_by_name(name)
+#     return [
+#         Indicator(
+#             id=d.id,
+#             name=d.name,
+#             short_name=d.short_name,
+#             unit=d.unit,
+#             type=d.type,
+#             temporality=d.temporality,
+#             indicator_category_id=d.indicator_category_id,
+#             description=d.description,
+#             enable=d.enable,
+#             registered_at=d.registered_at,
+#             updated_at=d.updated_at
+#         ) for d in data
+#     ]
+
+# @router.get("/by-short-name", response_model=List[Indicator])
+# def get_by_short_name(
+#     short_name: str = Query(..., description="Indicator short name")
+# ):
+#     """
+#     Returns indicators filtered by exact short name.
+#     - **short_name**: Short name of the indicator to filter by (e.g., 'crd').
+#     """
+#     service = MngIndicatorService()
+#     data = service.get_by_short_name(short_name)
+#     return [
+#         Indicator(
+#             id=d.id,
+#             name=d.name,
+#             short_name=d.short_name,
+#             unit=d.unit,
+#             type=d.type,
+#             temporality=d.temporality,
+#             indicator_category_id=d.indicator_category_id,
+#             description=d.description,
+#             enable=d.enable,
+#             registered_at=d.registered_at,
+#             updated_at=d.updated_at
+#         ) for d in data
+#     ]
+
+# @router.get("/by-type", response_model=List[Indicator])
+# def get_by_type(
+#     type: str = Query(..., description="Indicator type")
+# ):
+#     """
+#     Returns indicators filtered by type.
+#     - **type**: Type of the indicator to filter by (e.g., 'CLIMATE', 'AGROCLIMATIC').
+#     """
+#     service = MngIndicatorService()
+#     type_upper = type.upper()
+#     try:
+#         data = service.get_by_type(type_upper)
+#     except Exception as e:
+#         raise HTTPException(status_code=400, detail=f"Invalid indicator type: {type}")
+#     return [
+#         Indicator(
+#             id=d.id,
+#             name=d.name,
+#             short_name=d.short_name,
+#             unit=d.unit,
+#             type=d.type,
+#             temporality=d.temporality,
+#             indicator_category_id=d.indicator_category_id,
+#             description=d.description,
+#             enable=d.enable,
+#             registered_at=d.registered_at,
+#             updated_at=d.updated_at
+#         ) for d in data
+#     ]
+# @router.get("/by-id", response_model=Indicator)
+# def get_by_id(
+#     id: int = Query(..., description="Indicator ID")
+# ):
+#     """
+#     Returns indicator filtered by ID.
+#     - **id**: ID of the indicator to filter by.
+#     """
+#     service = MngIndicatorService()
+
+#     try:
+#         data = service.get_by_id(id)
+#         if not data:
+#             raise HTTPException(status_code=404, detail=f"Indicator with ID {id} not found")
+#         
+#         return Indicator(
+#             id=data.id,
+#             name=data.name,
+#             short_name=data.short_name,
+#             unit=data.unit,
+#             type=data.type,
+#             temporality=data.temporality,
+#             indicator_category_id=data.indicator_category_id,
+#             description=data.description,
+#             enable=data.enable,
+#             registered_at=data.registered_at,
+#             updated_at=data.updated_at
+#         )
+#     except Exception as e:
+#         raise HTTPException(status_code=400, detail=f"Invalid indicator ID: {id}")
+
+# @router.get("/all-enabled", response_model=List[Indicator])
+# def get_all_enabled():
+#     """
+#     Returns all enabled indicators.
+#     """
+#     service = MngIndicatorService()
+#     data = service.get_all_enabled()
+#     return [
+#         Indicator(
+#             id=d.id,
+#             name=d.name,
+#             short_name=d.short_name,
+#             unit=d.unit,
+#             type=d.type,
+#             temporality=d.temporality,
+#             indicator_category_id=d.indicator_category_id,
+#             description=d.description,
+#             enable=d.enable,
+#             registered_at=d.registered_at,
+#             updated_at=d.updated_at
+#         ) for d in data
+#     ]
+
+
+@router.get("/all-categories", response_model=List[IndicatorCategory])
+def get_all():
     """
-    Returns indicators filtered by exact name.
-    - **name**: Name of the indicator to filter by (e.g., 'consecutive_rainy_days').
+    Returns all indicator categories.
     """
-    service = MngIndicatorService()
-    data = service.get_by_name(name)
+    service = MngIndicatorCategoryService()
+    data = service.get_all()
     return [
-        Indicator(
+        IndicatorCategory(
             id=d.id,
             name=d.name,
-            short_name=d.short_name,
-            unit=d.unit,
-            type=d.type,
-            temporality=d.temporality,
-            indicator_category_id=d.indicator_category_id,
             description=d.description,
             enable=d.enable,
             registered_at=d.registered_at,
@@ -36,114 +165,6 @@ def get_by_name(
         ) for d in data
     ]
 
-@router.get("/by-short-name", response_model=List[Indicator])
-def get_by_short_name(
-    short_name: str = Query(..., description="Indicator short name")
-):
-    """
-    Returns indicators filtered by exact short name.
-    - **short_name**: Short name of the indicator to filter by (e.g., 'crd').
-    """
-    service = MngIndicatorService()
-    data = service.get_by_short_name(short_name)
-    return [
-        Indicator(
-            id=d.id,
-            name=d.name,
-            short_name=d.short_name,
-            unit=d.unit,
-            type=d.type,
-            temporality=d.temporality,
-            indicator_category_id=d.indicator_category_id,
-            description=d.description,
-            enable=d.enable,
-            registered_at=d.registered_at,
-            updated_at=d.updated_at
-        ) for d in data
-    ]
-
-@router.get("/by-type", response_model=List[Indicator])
-def get_by_type(
-    type: str = Query(..., description="Indicator type")
-):
-    """
-    Returns indicators filtered by type.
-    - **type**: Type of the indicator to filter by (e.g., 'CLIMATE', 'AGROCLIMATIC').
-    """
-    service = MngIndicatorService()
-    type_upper = type.upper()
-    try:
-        data = service.get_by_type(type_upper)
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=f"Invalid indicator type: {type}")
-    return [
-        Indicator(
-            id=d.id,
-            name=d.name,
-            short_name=d.short_name,
-            unit=d.unit,
-            type=d.type,
-            temporality=d.temporality,
-            indicator_category_id=d.indicator_category_id,
-            description=d.description,
-            enable=d.enable,
-            registered_at=d.registered_at,
-            updated_at=d.updated_at
-        ) for d in data
-    ]
-@router.get("/by-id", response_model=Indicator)
-def get_by_id(
-    id: int = Query(..., description="Indicator ID")
-):
-    """
-    Returns indicator filtered by ID.
-    - **id**: ID of the indicator to filter by.
-    """
-    service = MngIndicatorService()
-
-    try:
-        data = service.get_by_id(id)
-        if not data:
-            raise HTTPException(status_code=404, detail=f"Indicator with ID {id} not found")
-        
-        return Indicator(
-            id=data.id,
-            name=data.name,
-            short_name=data.short_name,
-            unit=data.unit,
-            type=data.type,
-            temporality=data.temporality,
-            indicator_category_id=data.indicator_category_id,
-            description=data.description,
-            enable=data.enable,
-            registered_at=data.registered_at,
-            updated_at=data.updated_at
-        )
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=f"Invalid indicator ID: {id}")
-
-@router.get("/all-enabled", response_model=List[Indicator])
-def get_all_enabled():
-    """
-    Returns all enabled indicators.
-    """
-    service = MngIndicatorService()
-    data = service.get_all_enabled()
-    return [
-        Indicator(
-            id=d.id,
-            name=d.name,
-            short_name=d.short_name,
-            unit=d.unit,
-            type=d.type,
-            temporality=d.temporality,
-            indicator_category_id=d.indicator_category_id,
-            description=d.description,
-            enable=d.enable,
-            registered_at=d.registered_at,
-            updated_at=d.updated_at
-        ) for d in data
-    ]
 
 @router.get("/by-category-id", response_model=List[Indicator])
 def get_by_category_id(
@@ -174,65 +195,65 @@ def get_by_category_id(
         ) for d in data
     ]
 
-@router.get("/by-category-name", response_model=List[Indicator])
-def get_by_category_name(
-    category_name: str = Query(..., description="Category name")
-):
-    """
-    Returns indicators filtered by category name.
-    - **category_name**: Name of the category to filter by (e.g., 'Extreme Temperature', 'Heat Stress').
-    """
-    service = MngIndicatorService()
-    try:
-        data = service.get_by_category_name(category_name)
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=f"Error fetching indicators by category name: {str(e)}")
-    return [
-        Indicator(
-            id=d.id,
-            name=d.name,
-            short_name=d.short_name,
-            unit=d.unit,
-            type=d.type,
-            temporality=d.temporality,
-            indicator_category_id=d.indicator_category_id,
-            description=d.description,
-            enable=d.enable,
-            registered_at=d.registered_at,
-            updated_at=d.updated_at
-        ) for d in data
-    ]
+# @router.get("/by-category-name", response_model=List[Indicator])
+# def get_by_category_name(
+#     category_name: str = Query(..., description="Category name")
+# ):
+#     """
+#     Returns indicators filtered by category name.
+#     - **category_name**: Name of the category to filter by (e.g., 'Extreme Temperature', 'Heat Stress').
+#     """
+#     service = MngIndicatorService()
+#     try:
+#         data = service.get_by_category_name(category_name)
+#     except Exception as e:
+#         raise HTTPException(status_code=400, detail=f"Error fetching indicators by category name: {str(e)}")
+#     return [
+#         Indicator(
+#             id=d.id,
+#             name=d.name,
+#             short_name=d.short_name,
+#             unit=d.unit,
+#             type=d.type,
+#             temporality=d.temporality,
+#             indicator_category_id=d.indicator_category_id,
+#             description=d.description,
+#             enable=d.enable,
+#             registered_at=d.registered_at,
+#             updated_at=d.updated_at
+#         ) for d in data
+#     ]
 
 
-@router.get("/by-temporality", response_model=List[Indicator])
-def get_by_temporality(
-    temporality: str = Query(..., description="Indicator temporality")
-):
-    """
-    Returns indicators filtered by temporality.
-    - **temporality**: Temporality of the indicator to filter by (e.g., 'DAILY', 'MONTHLY', 'ANNUAL').
-    """
-    service = MngIndicatorService()
-    temporality_upper = temporality.upper()
-    try:
-        data = service.get_by_temporality(temporality_upper)
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=f"Error fetching indicators by temporality: {str(e)}")
-    return [
-        Indicator(
-            id=d.id,
-            name=d.name,
-            short_name=d.short_name,
-            unit=d.unit,
-            type=d.type,
-            temporality=d.temporality,
-            indicator_category_id=d.indicator_category_id,
-            description=d.description,
-            enable=d.enable,
-            registered_at=d.registered_at,
-            updated_at=d.updated_at
-        ) for d in data
-    ]
+# @router.get("/by-temporality", response_model=List[Indicator])
+# def get_by_temporality(
+#     temporality: str = Query(..., description="Indicator temporality")
+# ):
+#     """
+#     Returns indicators filtered by temporality.
+#     - **temporality**: Temporality of the indicator to filter by (e.g., 'DAILY', 'MONTHLY', 'ANNUAL').
+#     """
+#     service = MngIndicatorService()
+#     temporality_upper = temporality.upper()
+#     try:
+#         data = service.get_by_temporality(temporality_upper)
+#     except Exception as e:
+#         raise HTTPException(status_code=400, detail=f"Error fetching indicators by temporality: {str(e)}")
+#     return [
+#         Indicator(
+#             id=d.id,
+#             name=d.name,
+#             short_name=d.short_name,
+#             unit=d.unit,
+#             type=d.type,
+#             temporality=d.temporality,
+#             indicator_category_id=d.indicator_category_id,
+#             description=d.description,
+#             enable=d.enable,
+#             registered_at=d.registered_at,
+#             updated_at=d.updated_at
+#         ) for d in data
+#     ]
 
 @router.get("/by-country", response_model=List[IndicatorWithFeatures])
 def get_by_country(

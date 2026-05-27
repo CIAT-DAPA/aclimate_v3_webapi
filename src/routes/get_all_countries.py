@@ -14,12 +14,11 @@ def get_all_countries():
     Requires a valid Keycloak token (user or client credentials).
     """
     countries = country_service.get_all_enable()
-    simplified_countries = [
-        {
-            "id": country.id,
-            "name": country.name,
-            "iso2": country.iso2
-        }
+    return [
+        Country(
+            id=country.id,
+            name=country.name,
+            iso2=country.iso2
+        )
         for country in countries
     ]
-    return simplified_countries

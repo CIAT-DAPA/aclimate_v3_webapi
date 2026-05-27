@@ -1,13 +1,10 @@
 from schemas.location import Country, Admin1, Admin2, Location, MeasureData, LatestData, LocationWithData
 from schemas.climate import (
-    ClimateHistoricalClimatology,
-    ClimateHistoricalDaily,
-    ClimateHistoricalMonthly,
+    ClimateHistoricalMonthRecord,
+    ClimateHistoricalDateRecord,
     ClimateHistoricalIndicatorRecord,
-    MinMaxClimatologyRecord,
-    MinMaxDailyRecord,
-    MinMaxMonthlyRecord,
-    MinMaxIndicatorRecord,
+    MinMaxMonthRecord,
+    MinMaxDateRecord,
 )
 from schemas.mng import CountryIndicator, IndicatorCategory, IndicatorFeature, Indicator, IndicatorWithFeatures
 from schemas.geoserver import Coordinate, PointDataRequest, PointDataResult
@@ -26,10 +23,9 @@ __all__ = [
     "Country", "Admin1", "Admin2", "Location",
     "MeasureData", "LatestData", "LocationWithData",
     # climate
-    "ClimateHistoricalClimatology", "ClimateHistoricalDaily",
-    "ClimateHistoricalMonthly", "ClimateHistoricalIndicatorRecord",
-    "MinMaxClimatologyRecord", "MinMaxDailyRecord",
-    "MinMaxMonthlyRecord", "MinMaxIndicatorRecord",
+    "ClimateHistoricalMonthRecord", "ClimateHistoricalDateRecord",
+    "ClimateHistoricalIndicatorRecord",
+    "MinMaxMonthRecord", "MinMaxDateRecord",
     # mng
     "CountryIndicator", "IndicatorCategory", "IndicatorFeature",
     "Indicator", "IndicatorWithFeatures",
