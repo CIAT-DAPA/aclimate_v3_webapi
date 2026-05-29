@@ -1,15 +1,15 @@
 from fastapi import APIRouter, Query
 from aclimate_v3_orm.services.mng_country_service import MngCountryService
-from aclimate_v3_orm.schemas import CountryRead
 from typing import List
+from schemas.location import Country
 
 router = APIRouter(tags=["Admin levels"])
 country_service = MngCountryService()
 
-@router.get("/countries/by-name", response_model=List[dict])  # Usar List[dict] para un filtrado dinámico
+@router.get("/countries/by-name", response_model=List[Country])
 def get_countries_by_name(
     name: str = Query(
-        "Colombia",  # Valor por defecto
+        "Colombia",
         description="Country name",
         examples="Colombia"
     )
@@ -19,15 +19,11 @@ def get_countries_by_name(
     - **name**: Name of the country to search for.
     """
     countries = country_service.get_by_name(name)
-    
-    # Filtrar los campos a incluir (id, name, iso2)
-    simplified_countries = [
-        {
-            "id": country.id,
-            "name": country.name,
-            "iso2": country.iso2
-        }
+    return [
+        Country(
+            id=country.id,
+            name=country.name,
+            iso2=country.iso2
+        )
         for country in countries
     ]
-    
-    return simplified_countries
