@@ -45,7 +45,8 @@ def mock_admin1_data():
     ]
 
 def test_get_admin1_by_name(mock_admin1_data):
-    with patch("aclimate_v3_orm.services.mng_admin_1_service.MngAdmin1Service.get_all", return_value=mock_admin1_data):
+    filtered = [a for a in mock_admin1_data if "anti" in a.name.lower()]
+    with patch("aclimate_v3_orm.services.mng_admin_1_service.MngAdmin1Service.get_by_name", return_value=filtered):
         response = client.get("/admin1/by-name", params={"name": "anti"})
         assert response.status_code == 200
 
