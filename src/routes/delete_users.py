@@ -34,25 +34,25 @@ async def get_admin_token():
     return response.json()["access_token"]
 
 
-@router.delete("/delete-user", summary="Delete a user from Keycloak by ID")
-async def delete_user(
-    request: DeleteUserRequest,
-    current_user: dict = Depends(require_roles(["adminsuper"]))
-):
-    token = await get_admin_token()
-
-    async with httpx.AsyncClient() as client:
-        delete_resp = await client.delete(
-            f"{KEYCLOAK_URL}/admin/realms/{REALM_NAME}/users/{request.user_id}",
-            headers={"Authorization": f"Bearer {token}"}
-        )
-
-        if delete_resp.status_code == 204:
-            return {"message": f"User with ID '{request.user_id}' was successfully deleted"}
-        elif delete_resp.status_code == 404:
-            raise HTTPException(status_code=404, detail="User not found")
-        else:
-            raise HTTPException(
-                status_code=delete_resp.status_code,
-                detail=f"Failed to delete user: {delete_resp.text}"
-            )
+# @router.delete("/delete-user", summary="Delete a user from Keycloak by ID")
+# async def delete_user(
+#     request: DeleteUserRequest,
+#     current_user: dict = Depends(require_roles(["adminsuper"]))
+# ):
+#     token = await get_admin_token()
+# 
+#     async with httpx.AsyncClient() as client:
+#         delete_resp = await client.delete(
+#             f"{KEYCLOAK_URL}/admin/realms/{REALM_NAME}/users/{request.user_id}",
+#             headers={"Authorization": f"Bearer {token}"}
+#         )
+# 
+#         if delete_resp.status_code == 204:
+#             return {"message": f"User with ID '{request.user_id}' was successfully deleted"}
+#         elif delete_resp.status_code == 404:
+#             raise HTTPException(status_code=404, detail="User not found")
+#         else:
+#             raise HTTPException(
+#                 status_code=delete_resp.status_code,
+#                 detail=f"Failed to delete user: {delete_resp.text}"
+#             )

@@ -3,7 +3,7 @@ from pydantic import BaseModel
 from datetime import date, datetime
 
 
-class ClimateHistoricalClimatology(BaseModel):
+class ClimateHistoricalMonthRecord(BaseModel):
     id: int
     location_id: int
     location_name: Optional[str]
@@ -31,7 +31,7 @@ class ClimateHistoricalClimatology(BaseModel):
         }
 
 
-class ClimateHistoricalDaily(BaseModel):
+class ClimateHistoricalDateRecord(BaseModel):
     id: int
     location_id: int
     location_name: Optional[str]
@@ -55,34 +55,6 @@ class ClimateHistoricalDaily(BaseModel):
                 "measure_unit": "°C",
                 "date": "1996-11-01",
                 "value": 23.0
-            }
-        }
-
-
-class ClimateHistoricalMonthly(BaseModel):
-    id: int
-    location_id: int
-    location_name: Optional[str]
-    measure_id: Optional[int]
-    measure_name: Optional[str]
-    measure_short_name: Optional[str]
-    measure_unit: Optional[str]
-    date: date
-    value: float
-
-    class Config:
-        from_attributes = True
-        json_schema_extra = {
-            "example": {
-                "id": 1,
-                "location_id": 7,
-                "location_name": "VILLAGARZON",
-                "measure_id": 7,
-                "measure_name": "Minimum temperature",
-                "measure_short_name": "tmin",
-                "measure_unit": "°C",
-                "date": "1996-10-01",
-                "value": 20.71
             }
         }
 
@@ -119,9 +91,9 @@ class ClimateHistoricalIndicatorRecord(BaseModel):
         }
 
 
-class MinMaxClimatologyRecord(BaseModel):
-    measure_id: int
-    measure_name: Optional[str] = None
+class MinMaxMonthRecord(BaseModel):
+    id: int
+    name: Optional[str] = None
     location_id: int
     location_name: Optional[str] = None
     min_value: float
@@ -132,21 +104,21 @@ class MinMaxClimatologyRecord(BaseModel):
     class Config:
         json_schema_extra = {
             "example": {
-                "measure_id": 2,
-                "measure_name": "precipitation",
+                "id": 2,
+                "name": "precipitation",
                 "location_id": 10,
                 "location_name": "Palmira",
                 "min_value": 0.0,
-                "min_month": "1",
+                "min_month": 1,
                 "max_value": 100.0,
-                "max_month": "2"
+                "max_month": 2
             }
         }
 
 
-class MinMaxDailyRecord(BaseModel):
-    measure_id: int
-    measure_name: Optional[str] = None
+class MinMaxDateRecord(BaseModel):
+    id: int
+    name: Optional[str] = None
     location_id: int
     location_name: Optional[str] = None
     min_value: float
@@ -157,63 +129,13 @@ class MinMaxDailyRecord(BaseModel):
     class Config:
         json_schema_extra = {
             "example": {
-                "measure_id": 2,
-                "measure_name": "precipitation",
+                "id": 2,
+                "name": "precipitation",
                 "location_id": 10,
                 "location_name": "Palmira",
                 "min_value": 0.0,
                 "min_date": "2024-01-01T00:00:00Z",
                 "max_value": 100.0,
-                "max_date": "2024-01-31T00:00:00Z"
-            }
-        }
-
-
-class MinMaxMonthlyRecord(BaseModel):
-    measure_id: int
-    measure_name: Optional[str] = None
-    location_id: int
-    location_name: Optional[str] = None
-    min_value: float
-    min_date: Optional[datetime] = None
-    max_value: float
-    max_date: Optional[datetime] = None
-
-    class Config:
-        json_schema_extra = {
-            "example": {
-                "measure_id": 2,
-                "measure_name": "precipitation",
-                "location_id": 10,
-                "location_name": "Palmira",
-                "min_value": 0.0,
-                "min_date": "2024-01-01T00:00:00Z",
-                "max_value": 100.0,
-                "max_date": "2024-01-31T00:00:00Z"
-            }
-        }
-
-
-class MinMaxIndicatorRecord(BaseModel):
-    indicator_id: int
-    indicator_name: Optional[str] = None
-    location_id: int
-    location_name: Optional[str] = None
-    min_value: float
-    min_date: Optional[datetime] = None
-    max_value: float
-    max_date: Optional[datetime] = None
-
-    class Config:
-        json_schema_extra = {
-            "example": {
-                "indicator_id": 2,
-                "indicator_name": "consecutive_rainy_days",
-                "location_id": 10,
-                "location_name": "Palmira",
-                "min_value": 1.0,
-                "min_date": "2024-01-01T00:00:00Z",
-                "max_value": 10.0,
                 "max_date": "2024-01-31T00:00:00Z"
             }
         }
