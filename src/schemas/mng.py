@@ -1,6 +1,5 @@
 from typing import Optional, List, Dict
 from pydantic import BaseModel
-from datetime import datetime
 
 
 class CountryIndicator(BaseModel):
@@ -34,8 +33,6 @@ class IndicatorCategory(BaseModel):
     name: str
     description: Optional[str] = None
     enable: bool
-    registered_at: Optional[datetime] = None
-    updated_at: Optional[datetime] = None
 
     class Config:
         from_attributes = True
@@ -44,9 +41,7 @@ class IndicatorCategory(BaseModel):
                 "id": 1,
                 "name": "Temperaturas Extremas",
                 "description": "Estos indicadores describen las variaciones y extremos en las condiciones de temperatura.",
-                "enable": True,
-                "registered_at": "2025-11-10T10:21:58.880837-05:00",
-                "updated_at": "2025-12-01T14:53:26.824239-05:00"
+                "enable": True
             }
         }
 
@@ -81,8 +76,6 @@ class Indicator(BaseModel):
     indicator_category_id: int
     description: Optional[str] = None
     enable: bool
-    registered_at: Optional[datetime] = None
-    updated_at: Optional[datetime] = None
 
     class Config:
         from_attributes = True
@@ -96,9 +89,7 @@ class Indicator(BaseModel):
                 "temporality": "ANNUAL",
                 "indicator_category_id": 1,
                 "description": "Cantidad total de días con temperaturas por debajo del percentil 10.",
-                "enable": True,
-                "registered_at": "2025-11-26T08:19:59.568067-05:00",
-                "updated_at": "2025-12-16T17:02:16.665452-05:00"
+                "enable": True
             }
         }
 
@@ -134,8 +125,6 @@ class IndicatorWithFeatures(Indicator):
                 "indicator_category_id": 1,
                 "description": "Cantidad total de días con temperaturas por debajo del percentil 10.",
                 "enable": True,
-                "registered_at": "2025-11-26T08:19:59.568067-05:00",
-                "updated_at": "2025-12-16T17:02:16.665452-05:00",
                 "features": []
             }
         }
