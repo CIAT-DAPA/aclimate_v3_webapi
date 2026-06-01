@@ -7,8 +7,6 @@ from aclimate_v3_orm.services.mng_country_indicator_service import MngCountryInd
 from aclimate_v3_orm.services.mng_indicators_features_service import MngIndicatorsFeaturesService
 from schemas.mng import Indicator, IndicatorFeature, IndicatorWithFeatures, IndicatorCategory
 
-from datetime import datetime
-
 router = APIRouter(tags=["Indicators"], prefix="/indicator-mng")
 
 # @router.get("/by-name", response_model=List[Indicator])
@@ -159,9 +157,7 @@ def get_all():
             id=d.id,
             name=d.name,
             description=d.description,
-            enable=d.enable,
-            registered_at=d.registered_at,
-            updated_at=d.updated_at
+            enable=d.enable
         ) for d in data
     ]
 
@@ -189,9 +185,7 @@ def get_by_category_id(
             temporality=d.temporality,
             indicator_category_id=d.indicator_category_id,
             description=d.description,
-            enable=d.enable,
-            registered_at=d.registered_at,
-            updated_at=d.updated_at
+            enable=d.enable
         ) for d in data
     ]
 
@@ -339,8 +333,6 @@ def get_by_country(
                     indicator_category_id=d.indicator_category_id,
                     description=d.description,
                     enable=d.enable,
-                    registered_at=d.registered_at,
-                    updated_at=d.updated_at,
                     features=features_data
                 )
             )
