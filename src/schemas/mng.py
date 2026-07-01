@@ -11,6 +11,9 @@ class CountryIndicator(BaseModel):
     location_forecast: bool
     location_climate: bool
     criteria: Optional[Dict] = None
+    description: Optional[str] = None
+    store: Optional[str] = None
+    workspace: Optional[str] = None
 
     class Config:
         from_attributes = True
@@ -23,7 +26,32 @@ class CountryIndicator(BaseModel):
                 "spatial_climate": False,
                 "location_forecast": True,
                 "location_climate": True,
-                "criteria": {"admin_level": 2, "threshold": 0.5}
+                "criteria": {"admin_level": 2, "threshold": 0.5},
+                "description": "Descripción del indicador para este país",
+                "store": "precipitation_data",
+                "workspace": "default_workspace"
+            }
+        }
+
+
+class ClimateMeasure(BaseModel):
+    id: int
+    name: str
+    short_name: str
+    unit: str
+    description: Optional[str] = None
+    enable: bool
+
+    class Config:
+        from_attributes = True
+        json_schema_extra = {
+            "example": {
+                "id": 1,
+                "name": "Precipitación",
+                "short_name": "prec",
+                "unit": "mm",
+                "description": "Precipitación total acumulada",
+                "enable": True
             }
         }
 

@@ -1,0 +1,25 @@
+from unittest.mock import patch, MagicMock
+
+from conftest import client, MockMeasure
+
+
+def test_get_climate_measures_by_country():
+    mock_data = [
+        MagicMock(measure=MockMeasure(1, "Precipitación", "prec", "mm", "Precipitación total acumulada")),
+        MagicMock(measure=MockMeasure(2, "Temperatura", "tavg", "°C", "Temperatura media")),
+    ]
+
+    with patch("aclimate_v3_orm.services.mng_country_climate_measure_service.MngCountryClimateMeasureService.get_by_country", return_value=mock_data):
+        response = client.get("/countries/1/climate-measures")
+        assert response.status_code == 200
+
+        data = response.json()
+        assert isinstance(data, list)
+        assert len(data) == 2
+        for item in data:
+            assert "id" in item
+            assert "name" in item
+            assert "short_name" in item
+            assert "unit" in item
+            assert "description" in item
+            assert "enable" in item

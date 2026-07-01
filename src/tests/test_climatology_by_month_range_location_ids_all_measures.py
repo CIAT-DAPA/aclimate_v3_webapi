@@ -1,22 +1,8 @@
-from fastapi.testclient import TestClient
-import os
-import sys
 import pytest
 from unittest.mock import patch
 
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-from main import app
-from dependencies.auth_dependencies import get_current_user
+from conftest import client, MockClimatologyRecord
 
-client = TestClient(app)
-
-_MOCK_USER = {"sub": "user123", "preferred_username": "mockuser", "token_type": "user"}
-
-@pytest.fixture(autouse=True)
-def mock_auth():
-    app.dependency_overrides[get_current_user] = lambda: _MOCK_USER
-    yield
-    app.dependency_overrides = {}
 
 @pytest.fixture
 def mock_climatology_data():
@@ -32,16 +18,6 @@ def mock_climatology_data():
             self.id = id
             self.name = name
 
-    class Climatology:
-        def __init__(self, id, location_id, location, measure_id, measure, month, value):
-            self.id = id
-            self.location_id = location_id
-            self.location = location
-            self.measure_id = measure_id
-            self.measure = measure
-            self.month = month
-            self.value = value
-
     location1 = Location(1, "Palmira")
     location2 = Location(2, "Cali")
     measure1 = Measure(10, "Precipitación", "prec", "mm")
@@ -49,14 +25,15 @@ def mock_climatology_data():
 
     return {
         1: [
-            Climatology(101, 1, location1, 10, measure1, 3, 123.4),
-            Climatology(102, 1, location1, 11, measure2, 4, 26.1),
+            MockClimatologyRecord(101, 1, location1, 10, measure1, 3, 123.4),
+            MockClimatologyRecord(102, 1, location1, 11, measure2, 4, 26.1),
         ],
         2: [
-            Climatology(201, 2, location2, 10, measure1, 5, 111.0),
-            Climatology(202, 2, location2, 11, measure2, 6, 28.0),
+            MockClimatologyRecord(201, 2, location2, 10, measure1, 5, 111.0),
+            MockClimatologyRecord(202, 2, location2, 11, measure2, 6, 28.0),
         ]
     }
+
 
 def test_get_climatology_by_month_range_location_ids_all_measures(mock_climatology_data):
     def mock_get_by_location_id(loc_id):
