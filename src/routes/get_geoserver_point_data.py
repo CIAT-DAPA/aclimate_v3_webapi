@@ -118,8 +118,8 @@ def get_point_data_from_coordinates(
 
         # Generate date list using shared service
         dates_to_process = []
-        start_date = request.start_date
-        end_date = request.end_date
+        start_date = request.date_start
+        end_date = request.date_end if request.date_end else request.date_start
 
         # Use the shared generate_date_list for consistency, then add 'date' field
         base_dates = generate_date_list(start_date, end_date, request.temporality)
@@ -167,11 +167,10 @@ def get_point_data_from_coordinates(
         # Sort results chronologically by date
         all_results.sort(key=lambda x: x.date)
 
-        return PointDataResponse(
-            request_parameters=request,
-            total_results=len(all_results),
-            data=all_results,
-        )
+        return {
+            "total_results": len(all_results),
+            "data": all_results,
+        }
 
     except HTTPException:
         raise
