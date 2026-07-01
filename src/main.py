@@ -27,8 +27,11 @@ from routes.get_locations_with_data import router as get_locations_with_latest_d
 from auth.get_client_token import router as get_client_token_router
 # Geoserver route
 from routes.get_geoserver_point_data import router as get_geoserver_point_data_router
+from routes.get_geoserver_raster import router as get_geoserver_raster_router
 # Periods route
 from routes.get_available_periods import router as get_available_periods_router
+# Country climate measures route
+from routes.get_climate_measures_by_country import router as get_climate_measures_by_country_router
 from fastapi.middleware.cors import CORSMiddleware
 from aclimate_v3_orm.database.base import create_tables
 
@@ -83,9 +86,13 @@ app.include_router(get_climate_historical_daily_by_date_ranges_and_all_measures_
 
 # Geoserver router
 app.include_router(get_geoserver_point_data_router, dependencies=_auth)
+app.include_router(get_geoserver_raster_router, dependencies=_auth)
 
 # Periods router
 app.include_router(get_available_periods_router, dependencies=_auth)
+
+# Country climate measures router
+app.include_router(get_climate_measures_by_country_router, dependencies=_auth)
 
 
 def startup_event():

@@ -1,51 +1,10 @@
-# test_admin1_by_name.py
+from unittest.mock import patch
 
-from fastapi.testclient import TestClient
-import os
-import sys
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+from conftest import client
 
-from main import app  
-import pytest
 
-from unittest.mock import patch, MagicMock
-from dependencies.auth_dependencies import get_current_user
-client = TestClient(app)
-
-_MOCK_USER = {"sub": "user123", "preferred_username": "mockuser", "token_type": "user"}
-
-@pytest.fixture(autouse=True)
-def mock_auth():
-    app.dependency_overrides[get_current_user] = lambda: _MOCK_USER
-    yield
-    app.dependency_overrides = {}
-
-@pytest.fixture
-def mock_admin1_data():
-    class Country:
-        def __init__(self, id, name, iso2):
-            self.id = id
-            self.name = name
-            self.iso2 = iso2
-
-    class Admin1:
-        def __init__(self, id, name, country, ext_id):
-            self.id = id
-            self.name = name
-            self.country = country
-            self.ext_id = ext_id
-
-    country1 = Country(id=1, name="Colombia", iso2="CO")
-    country2 = Country(id=2, name="Ecuador", iso2="EC")
-
-    return [
-        Admin1(id=1, name="Antioquia", country=country1, ext_id="05"),
-        Admin1(id=2, name="Antisana", country=country2, ext_id="17"),
-        Admin1(id=3, name="Bogotá", country=country1, ext_id="11"),
-    ]
-
-def test_get_admin1_by_name(mock_admin1_data):
-    filtered = [a for a in mock_admin1_data if "anti" in a.name.lower()]
+def test_get_admin1_by_name(mock_admin1_list):
+    filtered = [a for a in mock_admin1_list if "anti" in a.name.lower()]
     with patch("aclimate_v3_orm.services.mng_admin_1_service.MngAdmin1Service.get_by_name", return_value=filtered):
         response = client.get("/admin1/by-name", params={"name": "anti"})
         assert response.status_code == 200
