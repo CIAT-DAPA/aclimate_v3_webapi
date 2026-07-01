@@ -271,8 +271,9 @@ def get_by_country(
         if not country_indicators:
             return []
         
-        # Create a mapping of indicator_id to country_indicator_id for features lookup
+        # Create mappings from indicator_id for features lookup and description hierarchy
         indicator_to_country_indicator = {ci.indicator_id: ci.id for ci in country_indicators}
+        indicator_to_ci_description = {ci.indicator_id: ci.description for ci in country_indicators}
         
         # Extract indicator IDs from country indicators
         indicator_ids = [ci.indicator_id for ci in country_indicators]
@@ -322,6 +323,10 @@ def get_by_country(
                     ) for f in features
                 ]
             
+            # Hierarchy: country-specific description takes priority over indicator description
+            ci_description = indicator_to_ci_description.get(d.id)
+            description = ci_description if ci_description else d.description
+
             result.append(
                 IndicatorWithFeatures(
                     id=d.id,
@@ -331,7 +336,7 @@ def get_by_country(
                     type=d.type,
                     temporality=d.temporality,
                     indicator_category_id=d.indicator_category_id,
-                    description=d.description,
+                    description=description,
                     enable=d.enable,
                     features=features_data
                 )
