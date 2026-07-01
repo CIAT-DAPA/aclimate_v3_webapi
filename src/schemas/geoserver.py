@@ -18,18 +18,28 @@ class Coordinate(BaseModel):
 
 class PointDataRequest(BaseModel):
     coordinates: List[List[float]]
-    start_date: date
-    end_date: date
+    date_start: date
+    date_end: Optional[date] = None
     workspace: str
     store: str
     temporality: Literal["daily", "monthly", "annual"] = "daily"
+
+    @field_validator('date_end')
+    @classmethod
+    def validate_date_range(cls, v, info):
+        start = info.data.get('date_start')
+        if v is None:
+            return start
+        if v < start:
+            raise ValueError('date_end must be >= date_start')
+        return v
 
     class Config:
         json_schema_extra = {
             "example": {
                 "coordinates": [[-74.0817, 4.6097], [-75.5, 6.2]],
-                "start_date": "2024-01-01",
-                "end_date": "2024-01-31",
+                "date_start": "2024-01-01",
+                "date_end": "2024-01-31",
                 "workspace": "aclimate",
                 "store": "precipitation",
                 "temporality": "daily"
@@ -53,21 +63,12 @@ class PointDataResult(BaseModel):
 
 
 class PointDataResponse(BaseModel):
-    request_parameters: PointDataRequest
     total_results: int
     data: List[PointDataResult]
 
     class Config:
         json_schema_extra = {
             "example": {
-                "request_parameters": {
-                    "coordinates": [[-74.0817, 4.6097]],
-                    "start_date": "2024-01-01",
-                    "end_date": "2024-01-31",
-                    "workspace": "aclimate",
-                    "store": "precipitation",
-                    "temporality": "daily"
-                },
                 "total_results": 2,
                 "data": [
                     {
