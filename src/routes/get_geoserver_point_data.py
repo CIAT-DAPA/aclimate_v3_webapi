@@ -7,7 +7,7 @@ import logging
 from rasterio.io import MemoryFile
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
-from schemas.geoserver import Coordinate, PointDataRequest, PointDataResult
+from schemas.geoserver import Coordinate, PointDataRequest, PointDataResult, PointDataResponse
 
 from services.geoserver import (
     generate_date_list,
@@ -98,7 +98,7 @@ def process_date_data(date_info: Dict, coordinates: List[List[float]],
     return results
 
 
-@router.post("/point-data")
+@router.post("/point-data", response_model=PointDataResponse)
 def get_point_data_from_coordinates(
     request: PointDataRequest
 ):
@@ -167,18 +167,11 @@ def get_point_data_from_coordinates(
         # Sort results chronologically by date
         all_results.sort(key=lambda x: x.date)
 
-        return {
-            "request_parameters": {
-                "coordinates": request.coordinates,
-                "start_date": request.start_date.isoformat(),
-                "end_date": request.end_date.isoformat(),
-                "workspace": request.workspace,
-                "store": request.store,
-                "temporality": request.temporality,
-            },
-            "total_results": len(all_results),
-            "data": all_results,
-        }
+        return PointDataResponse(
+            request_parameters=request,
+            total_results=len(all_results),
+            data=all_results,
+        )
 
     except HTTPException:
         raise

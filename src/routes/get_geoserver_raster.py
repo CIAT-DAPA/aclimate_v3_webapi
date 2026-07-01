@@ -1,7 +1,6 @@
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import StreamingResponse
-from pydantic import BaseModel, Field, field_validator
-from typing import List, Optional, Literal, Dict
+from typing import List, Optional, Dict
 from datetime import date
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import logging
@@ -11,6 +10,8 @@ from rasterio.io import MemoryFile
 
 from aclimate_v3_cut_spatial_data import RioGeoServerClipper
 from aclimate_v3_cut_spatial_data.types.geometry_types import GeoServerConnection
+
+from schemas.geoserver import RasterExportRequest, ClipConfig
 
 from services.geoserver import (
     generate_date_list,
@@ -26,38 +27,6 @@ router = APIRouter(tags=["Geoserver"], prefix="/geoserver")
 
 # ---------- Logger ----------
 logger = logging.getLogger(__name__)
-
-
-# ---------- Modelos con Pydantic V2 ----------
-class ClipGeoserverSource(BaseModel):
-    workspace: str
-    layer: str
-    cql_filter: Optional[str] = None
-
-
-class ClipConfig(BaseModel):
-    enabled: bool = False
-    geoserver: Optional[ClipGeoserverSource] = None
-
-
-class RasterExportRequest(BaseModel):
-    workspace: str
-    store: str
-    date_start: date
-    date_end: Optional[date] = None
-    temporality: Literal["daily", "monthly", "annual"] = "daily"
-    clip: ClipConfig = ClipConfig()
-    output_format: Literal["single_tiff", "zip"] = "zip"
-
-    @field_validator('date_end')
-    @classmethod
-    def validate_date_range(cls, v, info):
-        start = info.data.get('date_start')
-        if v is None:
-            return start
-        if v < start:
-            raise ValueError('date_end must be >= date_start')
-        return v
 
 
 # ---------- Funciones auxiliares ----------
@@ -103,7 +72,40 @@ def process_single_date(date_info: Dict, workspace: str, store: str,
 
 
 # ---------- Endpoint ----------
-@router.post("/raster-export")
+@router.post(
+    "/raster-export",
+    responses={
+        200: {
+            "description": "Successfully exported raster(s) as GeoTIFF or ZIP file",
+            "content": {
+                "image/tiff": {
+                    "schema": {"type": "string", "format": "binary"},
+                    "example": "single_tiff output returns a .tif file"
+                },
+                "application/zip": {
+                    "schema": {"type": "string", "format": "binary"},
+                    "example": "zip output returns a .zip file containing multiple .tif files"
+                }
+            }
+        },
+        400: {
+            "description": "Bad request - too many dates requested or invalid parameters",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "Maximum 7 dates allowed for 'daily' temporality. Requested 10."}
+                }
+            }
+        },
+        404: {
+            "description": "No data found for the given dates",
+            "content": {
+                "application/json": {
+                    "example": {"detail": "No data found for the given dates"}
+                }
+            }
+        }
+    }
+)
 def export_rasters(request: RasterExportRequest):
     start = request.date_start
     end = request.date_end if request.date_end else start
