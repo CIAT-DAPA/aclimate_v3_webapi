@@ -6,26 +6,26 @@ from conftest import client, MockLocation, MockMeasure, MockRecord
 
 
 @pytest.fixture
-def mock_daily_data():
+def mock_monthly_data():
     loc = MockLocation(1, "Palmira", "EXT1", "palmira", True, None)
     m1 = MockMeasure(1, "Precipitación", "ppt", "mm")
     m2 = MockMeasure(2, "Temperatura", "tavg", "°C")
 
     return [
-        MockRecord(1, 1, loc, 1, m1, date(2025, 5, 3), 10.0),
-        MockRecord(2, 1, loc, 2, m2, date(2025, 5, 12), 28.5),
-        MockRecord(3, 1, loc, 1, m1, date(2025, 6, 1), 15.0),
+        MockRecord(1, 1, loc, 1, m1, date(2025, 5, 1), 100.0),
+        MockRecord(2, 1, loc, 2, m2, date(2025, 5, 1), 26.5),
+        MockRecord(3, 1, loc, 1, m1, date(2025, 6, 1), 150.0),
     ]
 
 
-def test_get_by_date_range_all_measures(mock_daily_data):
-    with patch("aclimate_v3_orm.services.climate_historical_daily_service.ClimateHistoricalDailyService.get_by_location_id", return_value=mock_daily_data):
+def test_get_historical_monthly_by_date_range_all_measures(mock_monthly_data):
+    with patch("aclimate_v3_orm.services.ClimateHistoricalMonthlyService.get_by_location_id", return_value=mock_monthly_data):
         response = client.get(
-            "/historical-daily/by-date-range-all-measures",
+            "/historical-monthly/by-date-range-all-measures",
             params={
                 "location_ids": "1",
                 "start_date": "2025-05-01",
-                "end_date": "2025-05-26"
+                "end_date": "2025-05-31"
             }
         )
 

@@ -1,70 +1,7 @@
-from fastapi.testclient import TestClient
-import pytest
 from unittest.mock import patch
-import os
-import sys
 
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-from main import app
-from dependencies.auth_dependencies import get_current_user
+from conftest import client
 
-client = TestClient(app)
-
-_MOCK_USER = {"sub": "user123", "preferred_username": "mockuser", "token_type": "user"}
-
-@pytest.fixture(autouse=True)
-def mock_auth():
-    app.dependency_overrides[get_current_user] = lambda: _MOCK_USER
-    yield
-    app.dependency_overrides = {}
-
-@pytest.fixture
-def mock_locations():
-    class Country:
-        def __init__(self, id, name, iso2):
-            self.id = id
-            self.name = name
-            self.iso2 = iso2
-
-    class Admin1:
-        def __init__(self, id, name, country, ext_id=None):
-            self.id = id
-            self.name = name
-            self.country = country
-            self.ext_id = ext_id
-
-    class Admin2:
-        def __init__(self, id, name, admin_1, ext_id=None):
-            self.id = id
-            self.name = name
-            self.admin_1 = admin_1
-            self.ext_id = ext_id
-
-    class Source:
-        def __init__(self, name):
-            self.name = name
-
-    class Location:
-        def __init__(self, id, name, ext_id, machine_name, visible, admin_2, altitude=100.0, latitude=3.45, longitude=-76.53, source_name="IDEAM"):
-            self.id = id
-            self.name = name
-            self.ext_id = ext_id
-            self.machine_name = machine_name
-            self.visible = visible
-            self.admin_2 = admin_2
-            self.altitude = altitude
-            self.latitude = latitude
-            self.longitude = longitude
-            self.enable = True
-            self.source = Source(source_name) if source_name else None
-
-    country = Country(1, "Colombia", "CO")
-    admin1 = Admin1(10, "Cundinamarca", country, "11")
-    admin2 = Admin2(20, "Bogotá", admin1, "11001")
-
-    return [
-        Location(101, "Test Location", "EXT101", "test_machine_name", True, admin2, 123.45, 4.5, -74.1, "IDEAM")
-    ]
 
 def test_get_locations_by_name(mock_locations):
     with patch("aclimate_v3_orm.services.mng_location_service.MngLocationService.get_by_name", return_value=mock_locations):
