@@ -40,7 +40,6 @@ class ClimateMeasure(BaseModel):
     short_name: str
     unit: str
     description: Optional[str] = None
-    enable: bool
 
     class Config:
         from_attributes = True
@@ -50,8 +49,7 @@ class ClimateMeasure(BaseModel):
                 "name": "Precipitación",
                 "short_name": "prec",
                 "unit": "mm",
-                "description": "Precipitación total acumulada",
-                "enable": True
+                "description": "Precipitación total acumulada"
             }
         }
 
