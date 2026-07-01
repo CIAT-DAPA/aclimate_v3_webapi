@@ -22,14 +22,19 @@ def get_climate_measures_by_country(country_id: int):
     if not data:
         return []
 
+    # Filter only enabled measures and exclude enable field from response
+    enabled_records = [
+        record for record in data
+        if record.measure and record.measure.enable
+    ]
+
     return [
         ClimateMeasure(
-            id=record.measure.id if record.measure else record.measure_id,
-            name=record.measure.name if record.measure else None,
-            short_name=record.measure.short_name if record.measure else None,
-            unit=record.measure.unit if record.measure else None,
-            description=record.measure.description if record.measure else None,
-            enable=record.measure.enable if record.measure else None,
+            id=record.measure.id,
+            name=record.measure.name,
+            short_name=record.measure.short_name,
+            unit=record.measure.unit,
+            description=record.measure.description,
         )
-        for record in data
+        for record in enabled_records
     ]
