@@ -65,8 +65,8 @@ def test_get_indicators_by_country(mock_country_service_class, mock_indicator_se
     mock_features_service_class.return_value = mock_features_instance
 
     mock_country_instance.get_by_country.return_value = [
-        MagicMock(indicator_id=1, id=100),
-        MagicMock(indicator_id=2, id=101),
+        MagicMock(indicator_id=1, id=100, description=None),
+        MagicMock(indicator_id=2, id=101, description=None),
     ]
 
     # Use plain objects to avoid conflicts with builtin 'type' and 'id'
