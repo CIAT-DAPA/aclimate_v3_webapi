@@ -18,28 +18,28 @@ class Coordinate(BaseModel):
 
 class PointDataRequest(BaseModel):
     coordinates: List[List[float]]
-    date_start: date
-    date_end: Optional[date] = None
+    start_date: date
+    end_date: Optional[date] = None
     workspace: str
     store: str
     temporality: Literal["daily", "monthly", "annual"] = "daily"
 
-    @field_validator('date_end')
+    @field_validator('end_date')
     @classmethod
     def validate_date_range(cls, v, info):
-        start = info.data.get('date_start')
+        start = info.data.get('start_date')
         if v is None:
             return start
         if v < start:
-            raise ValueError('date_end must be >= date_start')
+            raise ValueError('end_date must be >= start_date')
         return v
 
     class Config:
         json_schema_extra = {
             "example": {
                 "coordinates": [[-74.0817, 4.6097], [-75.5, 6.2]],
-                "date_start": "2024-01-01",
-                "date_end": "2024-01-31",
+                "start_date": "2024-01-01",
+                "end_date": "2024-01-31",
                 "workspace": "aclimate",
                 "store": "precipitation",
                 "temporality": "daily"
@@ -116,20 +116,20 @@ class ClipConfig(BaseModel):
 class RasterExportRequest(BaseModel):
     workspace: str
     store: str
-    date_start: date
-    date_end: Optional[date] = None
+    start_date: date
+    end_date: Optional[date] = None
     temporality: Literal["daily", "monthly", "annual"] = "daily"
     clip: ClipConfig = ClipConfig()
     output_format: Literal["single_tiff", "zip"] = "zip"
 
-    @field_validator('date_end')
+    @field_validator('end_date')
     @classmethod
     def validate_date_range(cls, v, info):
-        start = info.data.get('date_start')
+        start = info.data.get('start_date')
         if v is None:
             return start
         if v < start:
-            raise ValueError('date_end must be >= date_start')
+            raise ValueError('end_date must be >= start_date')
         return v
 
     class Config:
@@ -137,8 +137,8 @@ class RasterExportRequest(BaseModel):
             "example": {
                 "workspace": "aclimate",
                 "store": "precipitation",
-                "date_start": "2024-01-01",
-                "date_end": "2024-01-07",
+                "start_date": "2024-01-01",
+                "end_date": "2024-01-07",
                 "temporality": "daily",
                 "clip": {
                     "enabled": False,
