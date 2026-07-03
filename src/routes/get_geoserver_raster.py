@@ -107,8 +107,8 @@ def process_single_date(date_info: Dict, workspace: str, store: str,
     }
 )
 def export_rasters(request: RasterExportRequest):
-    start = request.date_start
-    end = request.date_end if request.date_end else start
+    start = request.start_date
+    end = request.end_date if request.end_date else start
     date_list = generate_date_list(start, end, request.temporality)
 
     # Validate date count against temporality-based limit
