@@ -118,8 +118,8 @@ def get_point_data_from_coordinates(
 
         # Generate date list using shared service
         dates_to_process = []
-        start_date = request.date_start
-        end_date = request.date_end if request.date_end else request.date_start
+        start_date = request.start_date
+        end_date = request.end_date if request.end_date else request.start_date
 
         # Use the shared generate_date_list for consistency, then add 'date' field
         base_dates = generate_date_list(start_date, end_date, request.temporality)
