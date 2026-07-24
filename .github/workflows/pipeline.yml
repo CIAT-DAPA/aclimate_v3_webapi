@@ -153,7 +153,8 @@ jobs:
         id: meta
         run: |
           TAG="${{ needs.PostRelease.outputs.release_tag }}"
-          echo "tags=ghcr.io/${{ github.repository }}:latest,ghcr.io/${{ github.repository }}:${TAG}" >> $GITHUB_OUTPUT
+          REPO=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
+          echo "tags=ghcr.io/${REPO}:latest,ghcr.io/${REPO}:${TAG}" >> $GITHUB_OUTPUT
 
       - name: Build and push
         uses: docker/build-push-action@v6
