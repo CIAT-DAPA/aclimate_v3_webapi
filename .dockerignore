@@ -1,0 +1,10 @@
+.git
+__pycache__/
+*.pyc
+.env
+.venv/
+capacitacion_honduras/
+.idea/
+.vscode/
+*.log
+tests/
