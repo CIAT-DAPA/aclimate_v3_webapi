@@ -5,7 +5,7 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     PIP_NO_CACHE_DIR=1 \
     PORT=3002
 
-# Dependencias de sistema necesarias para rasterio, geopandas, psycopg2 y dependencias git
+# System dependencies for rasterio, geopandas, psycopg2, and git-based packages
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libpq-dev \
     gdal-bin \
@@ -20,16 +20,16 @@ WORKDIR /app
 
 RUN useradd -l -u 10001 appuser
 
-# Instalar dependencias Python (capa cacheable)
+# Install Python dependencies (cacheable layer)
 COPY src/requirements.txt /app/src/requirements.txt
 RUN pip install --no-cache-dir -r /app/src/requirements.txt
 
-# Copiar código fuente
+# Copy application source code
 COPY src/ /app/src
 
 WORKDIR /app/src
 
-# Limpiar dependencias de compilación que ya no se necesitan en runtime
+# Remove build-time dependencies no longer needed at runtime
 RUN apt-get remove -y gcc g++ libgdal-dev && \
     apt-get autoremove -y && \
     rm -rf /var/lib/apt/lists/*

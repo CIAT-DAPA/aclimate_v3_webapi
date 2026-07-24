@@ -96,7 +96,7 @@ app.include_router(get_available_periods_router, dependencies=_auth)
 # Country climate measures router
 app.include_router(get_climate_measures_by_country_router, dependencies=_auth)
 
-# Health router (sin autenticación y sin incluir en OpenAPI schema)
+# Health router (no authentication, excluded from OpenAPI schema)
 app.include_router(health_router)
 
 
