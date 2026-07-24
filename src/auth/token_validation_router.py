@@ -41,7 +41,7 @@ def validate_local_token(credentials: HTTPAuthorizationCredentials = Depends(sec
             key,
             algorithms=[unverified_header["alg"]],
             audience="account",
-            issuer=f"{KEYCLOAK_URL}/realms/{REALM_NAME}",
+            issuer=f"{KEYCLOAK_URL.rstrip('/')}/realms/{REALM_NAME}",
         )
 
         filtered_payload = {

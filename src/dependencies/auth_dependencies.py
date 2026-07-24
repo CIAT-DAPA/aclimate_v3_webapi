@@ -77,7 +77,7 @@ def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(securit
             key,
             algorithms=[unverified_header["alg"]],
             audience="account",
-            issuer=f"{keycloak_url}/realms/{realm_name}",
+            issuer=f"{keycloak_url.rstrip('/')}/realms/{realm_name}",
         )
         payload["token_type"] = _resolve_token_type(payload)
         return payload
