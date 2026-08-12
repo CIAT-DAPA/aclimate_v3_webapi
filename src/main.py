@@ -22,6 +22,7 @@ from routes.minmax_monthly_by_location import router as minmax_monthly_by_locati
 from routes.minmax_climatology_by_location import router as minmax_climatology_by_location_router
 from routes.get_climate_historical_daily_by_date_ranges_and_all_measures import router as get_climate_historical_daily_by_date_ranges_and_all_measures_router
 from routes.get_locations_by_name import router as get_locations_by_name_router
+from routes.get_locations_by_search import router as get_locations_by_search_router
 from routes.get_locations_by_id import router as get_locations_by_id_router
 from routes.get_locations_with_data import router as get_locations_with_latest_data_router
 from auth.get_client_token import router as get_client_token_router
@@ -67,6 +68,7 @@ app.include_router(get_admin1_by_adm1_name_router, dependencies=_auth)
 app.include_router(get_adm2_by_country_id_router, dependencies=_auth)
 app.include_router(get_adm2_by_name_router, dependencies=_auth)
 app.include_router(get_locations_by_name_router, dependencies=_auth)
+app.include_router(get_locations_by_search_router, dependencies=_auth)
 app.include_router(get_locations_by_id_router, dependencies=_auth)
 app.include_router(get_locations_with_latest_data_router, dependencies=_auth)
 
