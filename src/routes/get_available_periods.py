@@ -44,7 +44,9 @@ def get_available_periods(location_id: int):
         # Check for indicator periods for the specific location
         has_daily = check_indicator_period_has_data(db, "DAILY", location_id)
         has_monthly = check_indicator_period_has_data(db, "MONTHLY", location_id)
+        has_climatology = check_indicator_period_has_data(db, "CLIMATOLOGY", location_id)
         has_annual = check_indicator_period_has_data(db, "ANNUAL", location_id)
+        has_multiyear_monthly = check_indicator_period_has_data(db, "MULTIYEAR_MONTHLY", location_id)
         has_seasonal = check_indicator_period_has_data(db, "SEASONAL", location_id)
         has_decadal = check_indicator_period_has_data(db, "DECADAL", location_id)
         has_other = check_indicator_period_has_data(db, "OTHER", location_id)
@@ -62,9 +64,19 @@ def get_available_periods(location_id: int):
                 has_data=has_monthly
             ),
             PeriodResponse(
+                value="climatology", 
+                label="Climatology", 
+                has_data=has_climatology
+            ),
+            PeriodResponse(
                 value="annual", 
                 label="Annual", 
                 has_data=has_annual
+            ),
+            PeriodResponse(
+                value="multiyear_monthly", 
+                label="Multiyear Monthly", 
+                has_data=has_multiyear_monthly
             ),
             PeriodResponse(
                 value="seasonal", 
