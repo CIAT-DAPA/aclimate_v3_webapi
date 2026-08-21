@@ -27,3 +27,87 @@ def test_get_climate_measures_by_country():
             assert "unit" in item
             assert "description" in item
             assert "enable" not in item
+
+
+def test_get_country_climate_measure_configuration():
+    mock_measure_1 = MockMeasure(1, "Precipitación", "prec", "mm", "Precipitación total acumulada")
+    mock_measure_1.enable = True
+    mock_measure_2 = MockMeasure(2, "Temperatura", "tavg", "°C", "Temperatura media")
+    mock_measure_2.enable = True
+    mock_measure_disabled = MockMeasure(3, "Humedad", "rhum", "%", "Humedad relativa")
+    mock_measure_disabled.enable = False
+
+    # Temporality with a mix of strings and enum-like objects with .value
+    mock_data = [
+        MagicMock(
+            id=11,
+            country_id=1,
+            measure_id=1,
+            spatial_forecast=True,
+            spatial_climate=True,
+            location_forecast=False,
+            location_climate=True,
+            temporality=["daily", "climatology"],
+            description="Config Precipitación",
+            store="precipitation_data",
+            workspace="default_workspace",
+            measure=mock_measure_1,
+        ),
+        MagicMock(
+            id=12,
+            country_id=1,
+            measure_id=2,
+            spatial_forecast=False,
+            spatial_climate=True,
+            location_forecast=True,
+            location_climate=False,
+            temporality=[MagicMock(value="annual")],
+            description=None,
+            store=None,
+            workspace=None,
+            measure=mock_measure_2,
+        ),
+        MagicMock(
+            id=13,
+            country_id=1,
+            measure_id=3,
+            spatial_forecast=False,
+            spatial_climate=False,
+            location_forecast=False,
+            location_climate=False,
+            temporality=[],
+            description=None,
+            store=None,
+            workspace=None,
+            measure=mock_measure_disabled,
+        ),
+    ]
+
+    with patch("aclimate_v3_orm.services.mng_country_climate_measure_service.MngCountryClimateMeasureService.get_by_country", return_value=mock_data):
+        response = client.get("/countries/1/climate-measures/configuration")
+        assert response.status_code == 200
+
+        data = response.json()
+        assert isinstance(data, list)
+        assert len(data) == 2  # disabled measure filtered out
+
+        config_map = {item["id"]: item for item in data}
+
+        first = config_map[11]
+        assert first["country_id"] == 1
+        assert first["measure_id"] == 1
+        assert first["spatial_forecast"] is True
+        assert first["spatial_climate"] is True
+        assert first["location_forecast"] is False
+        assert first["location_climate"] is True
+        assert first["temporality"] == ["daily", "climatology"]
+        assert first["description"] == "Config Precipitación"
+        assert first["store"] == "precipitation_data"
+        assert first["workspace"] == "default_workspace"
+
+        second = config_map[12]
+        # List containing a single enum-like object -> serialized to ["annual"]
+        assert second["temporality"] == ["annual"]
+        assert second["description"] is None
+        assert second["store"] is None
+        assert second["workspace"] is None

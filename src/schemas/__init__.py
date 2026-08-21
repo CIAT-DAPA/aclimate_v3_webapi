@@ -6,7 +6,7 @@ from schemas.climate import (
     MinMaxMonthRecord,
     MinMaxDateRecord,
 )
-from schemas.mng import CountryIndicator, IndicatorCategory, IndicatorFeature, Indicator, IndicatorWithFeatures
+from schemas.mng import CountryIndicator, CountryClimateMeasure, IndicatorCategory, IndicatorFeature, Indicator, IndicatorWithFeatures
 from schemas.geoserver import (
     Coordinate, PointDataRequest, PointDataResult, PointDataResponse,
     ClipGeoserverSource, ClipConfig, RasterExportRequest,
@@ -30,7 +30,7 @@ __all__ = [
     "ClimateHistoricalIndicatorRecord",
     "MinMaxMonthRecord", "MinMaxDateRecord",
     # mng
-    "CountryIndicator", "IndicatorCategory", "IndicatorFeature",
+    "CountryIndicator", "CountryClimateMeasure", "IndicatorCategory", "IndicatorFeature",
     "Indicator", "IndicatorWithFeatures",
     # geoserver
     "Coordinate", "PointDataRequest", "PointDataResult",

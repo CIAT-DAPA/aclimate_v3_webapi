@@ -54,6 +54,38 @@ class ClimateMeasure(BaseModel):
         }
 
 
+class CountryClimateMeasure(BaseModel):
+    id: int
+    country_id: int
+    measure_id: int
+    spatial_forecast: bool
+    spatial_climate: bool
+    location_forecast: bool
+    location_climate: bool
+    temporality: List[str] = []
+    description: Optional[str] = None
+    store: Optional[str] = None
+    workspace: Optional[str] = None
+
+    class Config:
+        from_attributes = True
+        json_schema_extra = {
+            "example": {
+                "id": 1,
+                "country_id": 1,
+                "measure_id": 3,
+                "spatial_forecast": False,
+                "spatial_climate": True,
+                "location_forecast": False,
+                "location_climate": True,
+                "temporality": ["daily", "climatology"],
+                "description": "Configuración de la medida para este país",
+                "store": "precipitation_data",
+                "workspace": "default_workspace"
+            }
+        }
+
+
 class IndicatorCategory(BaseModel):
     id: int
     name: str
