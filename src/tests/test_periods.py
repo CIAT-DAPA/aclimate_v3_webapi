@@ -13,7 +13,7 @@ def test_get_available_periods():
         mock_session_local.return_value = mock_session
         # Mock scalar() to return True for daily/monthly, False for others
         mock_scalar = MagicMock()
-        mock_scalar.scalar.side_effect = [True, True, False, False, False, False]
+        mock_scalar.scalar.side_effect = [True, True, False, False, False, False, False, False]
         mock_session.query.return_value = mock_scalar
 
         response = client.get("/periods/available", params={"location_id": 1})
@@ -21,12 +21,14 @@ def test_get_available_periods():
 
         data = response.json()
         assert isinstance(data, list)
-        assert len(data) == 6
+        assert len(data) == 8
 
         period_map = {p["value"]: p["has_data"] for p in data}
         assert period_map["daily"] is True
         assert period_map["monthly"] is True
+        assert period_map["climatology"] is False
         assert period_map["annual"] is False
+        assert period_map["multiyear_monthly"] is False
         assert period_map["seasonal"] is False
         assert period_map["decadal"] is False
         assert period_map["other"] is False
