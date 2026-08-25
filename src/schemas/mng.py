@@ -54,6 +54,22 @@ class ClimateMeasure(BaseModel):
         }
 
 
+class SpatialClimateConf(BaseModel):
+    temporality: str
+    store: Optional[str] = None
+    workspace: Optional[str] = None
+
+    class Config:
+        from_attributes = True
+        json_schema_extra = {
+            "example": {
+                "temporality": "daily",
+                "store": "climate_historical_daily_ni_prec",
+                "workspace": "climate_historical_daily"
+            }
+        }
+
+
 class CountryClimateMeasure(BaseModel):
     id: int
     country_id: int
@@ -62,26 +78,35 @@ class CountryClimateMeasure(BaseModel):
     spatial_climate: bool
     location_forecast: bool
     location_climate: bool
-    temporality: List[str] = []
+    spatial_climate_conf: Optional[List[SpatialClimateConf]] = None
+    location_climate_conf: Optional[List[str]] = None
     description: Optional[str] = None
-    store: Optional[str] = None
-    workspace: Optional[str] = None
 
     class Config:
         from_attributes = True
         json_schema_extra = {
             "example": {
-                "id": 1,
-                "country_id": 1,
-                "measure_id": 3,
+                "id": 6,
+                "country_id": 4,
+                "measure_id": 8,
                 "spatial_forecast": False,
                 "spatial_climate": True,
                 "location_forecast": False,
                 "location_climate": True,
-                "temporality": ["daily", "climatology"],
-                "description": "Configuración de la medida para este país",
-                "store": "precipitation_data",
-                "workspace": "default_workspace"
+                "spatial_climate_conf": [
+                    {
+                        "temporality": "daily",
+                        "store": "climate_historical_daily_ni_prec",
+                        "workspace": "climate_historical_daily"
+                    },
+                    {
+                        "temporality": "monthly",
+                        "store": "climate_historical_monthly_ni_prec",
+                        "workspace": "climate_historical_monthly"
+                    }
+                ],
+                "location_climate_conf": ["daily", "monthly", "climatology"],
+                "description": None
             }
         }
 
