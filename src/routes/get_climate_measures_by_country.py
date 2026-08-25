@@ -1,16 +1,42 @@
 from fastapi import APIRouter, HTTPException
-from typing import List
+from typing import List, Optional
 from aclimate_v3_orm.services.mng_country_climate_measure_service import MngCountryClimateMeasureService
 from schemas.mng import ClimateMeasure, CountryClimateMeasure
 
 router = APIRouter(tags=["Country Climate Measures"], prefix="/countries")
 
 
-def _serialize_temporality(temporality) -> List[str]:
-    """Serialize Period enum values to lowercase strings."""
-    if not temporality:
-        return []
-    return [t.value if hasattr(t, "value") else t for t in temporality]
+def _serialize_period(value) -> str:
+    """Serialize a Period enum value (or plain string) to its lowercase string value."""
+    return value.value if hasattr(value, "value") else value
+
+
+def _serialize_location_climate_conf(conf) -> Optional[List[str]]:
+    """Serialize location_climate_conf (list of Period enums/strings) to a list of strings."""
+    if not conf:
+        return None
+    return [_serialize_period(p) for p in conf]
+
+
+def _serialize_spatial_climate_conf(conf) -> Optional[List[dict]]:
+    """Serialize spatial_climate_conf (list of dicts/objects) to a list of dicts."""
+    if not conf:
+        return None
+    result = []
+    for item in conf:
+        if isinstance(item, dict):
+            result.append({
+                "temporality": _serialize_period(item.get("temporality")),
+                "store": item.get("store"),
+                "workspace": item.get("workspace"),
+            })
+        else:
+            result.append({
+                "temporality": _serialize_period(getattr(item, "temporality", None)),
+                "store": getattr(item, "store", None),
+                "workspace": getattr(item, "workspace", None),
+            })
+    return result
 
 
 @router.get("/{country_id}/climate-measures", response_model=List[ClimateMeasure])
@@ -54,7 +80,7 @@ def get_country_climate_measure_configuration(country_id: int):
 
     Unlike /climate-measures (which returns the measure variable itself),
     this endpoint returns the full configuration (country_id, measure_id,
-    spatial/location flags, temporality, description, store, workspace).
+    spatial/location flags, spatial_climate_conf, location_climate_conf, description).
 
     - **country_id**: ID of the country (e.g., 1, 2, 3).
     """
@@ -82,10 +108,9 @@ def get_country_climate_measure_configuration(country_id: int):
             spatial_climate=record.spatial_climate,
             location_forecast=record.location_forecast,
             location_climate=record.location_climate,
-            temporality=_serialize_temporality(record.temporality),
+            spatial_climate_conf=_serialize_spatial_climate_conf(record.spatial_climate_conf),
+            location_climate_conf=_serialize_location_climate_conf(record.location_climate_conf),
             description=record.description,
-            store=record.store,
-            workspace=record.workspace,
         )
         for record in enabled_records
     ]
