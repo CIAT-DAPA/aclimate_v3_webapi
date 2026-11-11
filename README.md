@@ -26,7 +26,8 @@ This API exposes data models (countries, locations, admin levels, climate data) 
 
 ## ✅ Requirements
 
-- Python > 3.10  
+- Python >= 3.10  
+- [uv](https://docs.astral.sh/uv/) to manage the environment and dependencies  
 - **Keycloak** running and configured for user management and token issuance  
 - Relational database (PostgreSQL)  
 - Dependencies: FastAPI, Pydantic, SQLAlchemy, psycopg2, python-dotenv, uvicorn, python-keycloak, jose  
@@ -57,9 +58,15 @@ Clone the repository and install dependencies:
 
 ```bash
 git clone https://github.com/CIAT-DAPA/aclimate_v3_api.git
-cd src
-pip install -r requirements.txt
+cd aclimate_v3_webapi
+uv sync
 ```
+
+`uv sync` creates the `.venv` environment with Python 3.10 and installs the exact versions pinned in `uv.lock`
+(use `uv sync --no-dev` to skip the test dependencies).
+
+To add or update a dependency use `uv add <package>` / `uv lock --upgrade-package <package>` and commit
+both `pyproject.toml` and `uv.lock`.
 ## 🌱 Set the Environment Variables
 
 Set up the environment variables in a `.env` file:
@@ -72,4 +79,13 @@ KEYCLOAK_CLIENT_SECRET=<client-secret>
 ```
 ## 🚀 Run the API
 
-uvicorn main:app --reload
+```bash
+cd src
+uv run uvicorn main:app --reload
+```
+
+## 🧪 Run the tests
+
+```bash
+uv run pytest
+```
