@@ -1,8 +1,15 @@
-FROM python:3.11-slim
+FROM python:3.10-slim
+
+# uv binary used to install the locked dependencies
+COPY --from=ghcr.io/astral-sh/uv:0.11.32 /uv /uvx /bin/
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     PIP_NO_CACHE_DIR=1 \
+    UV_NO_CACHE=1 \
+    UV_LINK_MODE=copy \
+    UV_PROJECT_ENVIRONMENT=/app/.venv \
+    PATH="/app/.venv/bin:$PATH" \
     PORT=3002
 
 # System dependencies for rasterio, geopandas, psycopg2, and git-based packages
@@ -21,8 +28,8 @@ WORKDIR /app
 RUN useradd -l -u 10001 appuser
 
 # Install Python dependencies (cacheable layer)
-COPY src/requirements.txt /app/src/requirements.txt
-RUN pip install --no-cache-dir -r /app/src/requirements.txt
+COPY pyproject.toml uv.lock .python-version /app/
+RUN uv sync --frozen --no-dev
 
 # Copy application source code
 COPY src/ /app/src
