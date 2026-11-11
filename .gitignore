@@ -72,12 +72,14 @@ venv/
 ENV/
 env.bak/
 venv.bak/
+.venv/
 
 # Jupyter Notebook
 .ipynb_checkpoints
 
 # pyenv
-.python-version
+# .python-version is tracked on purpose: uv, Docker and CI read the Python version from it
+# .python-version
 
 # pipenv
 Pipfile.lock
