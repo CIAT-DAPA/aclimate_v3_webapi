@@ -1,4 +1,4 @@
-from typing import List, Literal, Optional, Dict
+from typing import Any, List, Literal, Optional, Dict
 from pydantic import BaseModel, field_validator
 from datetime import date
 
@@ -77,6 +77,56 @@ class PointDataResponse(BaseModel):
                         "value": 12.5
                     }
                 ]
+            }
+        }
+
+
+class PolygonDataRequest(BaseModel):
+    """
+    Request body for /geoserver/polygon-data.
+
+    - polygon: GeoJSON (EPSG:4326) used to clip the rasters. It can be a Polygon or
+      MultiPolygon geometry, a Feature or a FeatureCollection.
+    - start_date: Start date of the range.
+    - end_date: End date of the range (defaults to start_date).
+    - workspace: Geoserver workspace.
+    - store: Geoserver store/mosaic.
+    - temporality: Time frequency ("daily", "monthly" or "annual").
+    """
+    polygon: Dict[str, Any]
+    start_date: date
+    end_date: Optional[date] = None
+    workspace: str
+    store: str
+    temporality: Literal["daily", "monthly", "annual"] = "daily"
+
+    @field_validator('end_date')
+    @classmethod
+    def validate_date_range(cls, v, info):
+        """Default end_date to start_date and reject ranges that end before they start."""
+        start = info.data.get('start_date')
+        # When end_date is not sent the range is a single date
+        if v is None:
+            return start
+        # The range must not end before it starts
+        if v < start:
+            raise ValueError('end_date must be >= start_date')
+        return v
+
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "polygon": {
+                    "type": "Polygon",
+                    "coordinates": [[
+                        [-86.6, 12.9], [-86.1, 12.9], [-86.1, 13.4], [-86.6, 13.4], [-86.6, 12.9]
+                    ]]
+                },
+                "start_date": "2024-01-01",
+                "end_date": "2024-01-03",
+                "workspace": "climate_historical_daily",
+                "store": "climate_historical_daily_ni_prec",
+                "temporality": "daily"
             }
         }
 
