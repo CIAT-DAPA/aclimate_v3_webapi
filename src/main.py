@@ -39,9 +39,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from aclimate_v3_orm.database.base import create_tables
 
 app = FastAPI(
-    title="Aclimate v3 API",
+    title="AClimate v3 API",
     version="3.0",
-    description="API for Aclimate including various administrative levels and climate data."
+    description="AClimate API get access to all data."
 )
 
 

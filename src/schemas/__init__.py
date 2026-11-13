@@ -1,4 +1,7 @@
-from schemas.location import Country, Admin1, Admin2, Location, MeasureData, LatestData, LocationWithData
+from schemas.location import (
+    Country, CountryClimateConf, CountryIndicatorConf,
+    Admin1, Admin2, Location, MeasureData, LatestData, LocationWithData,
+)
 from schemas.climate import (
     ClimateHistoricalMonthRecord,
     ClimateHistoricalDateRecord,
@@ -23,7 +26,8 @@ from schemas.auth import (
 
 __all__ = [
     # location
-    "Country", "Admin1", "Admin2", "Location",
+    "Country", "CountryClimateConf", "CountryIndicatorConf",
+    "Admin1", "Admin2", "Location",
     "MeasureData", "LatestData", "LocationWithData",
     # climate
     "ClimateHistoricalMonthRecord", "ClimateHistoricalDateRecord",
