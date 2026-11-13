@@ -1,11 +1,114 @@
-from typing import Optional, List
+from typing import Optional, List, Dict
 from pydantic import BaseModel
+from schemas.mng import SpatialClimateConf
+
+
+class CountryClimateConf(BaseModel):
+    """
+    Climate measure configured for a country.
+
+    Flat object that merges the country configuration (mng_country_climate_measure)
+    with the measure catalog data (mng_climate_measure). It does not expose IDs.
+    """
+    # Measure catalog data (mng_climate_measure)
+    name: str
+    short_name: str
+    unit: str
+    description: Optional[str] = None
+    # Country specific configuration (mng_country_climate_measure)
+    country_description: Optional[str] = None
+    spatial_forecast: bool
+    spatial_climate: bool
+    location_forecast: bool
+    location_climate: bool
+    spatial_climate_conf: Optional[List[SpatialClimateConf]] = None
+    location_climate_conf: Optional[List[str]] = None
+
+    class Config:
+        from_attributes = True
+        json_schema_extra = {
+            "example": {
+                "name": "Precipitación",
+                "short_name": "prec",
+                "unit": "mm",
+                "description": "Precipitación total acumulada",
+                "country_description": None,
+                "spatial_forecast": False,
+                "spatial_climate": True,
+                "location_forecast": False,
+                "location_climate": True,
+                "spatial_climate_conf": [
+                    {
+                        "temporality": "daily",
+                        "store": "climate_historical_daily_ni_prec",
+                        "workspace": "climate_historical_daily"
+                    }
+                ],
+                "location_climate_conf": ["daily", "monthly", "climatology"]
+            }
+        }
+
+
+class CountryIndicatorConf(BaseModel):
+    """
+    Indicator configured for a country.
+
+    Flat object that merges the country configuration (mng_country_indicator)
+    with the indicator catalog data (mng_indicators) and its category
+    (mng_indicator_category). It does not expose IDs.
+    """
+    # Indicator catalog data (mng_indicators)
+    type: str
+    name: str
+    short_name: str
+    unit: str
+    temporality: str
+    description: Optional[str] = None
+    # Indicator category data (mng_indicator_category)
+    category_name: Optional[str] = None
+    category_description: Optional[str] = None
+    # Country specific configuration (mng_country_indicator)
+    country_description: Optional[str] = None
+    spatial_forecast: bool
+    spatial_climate: bool
+    location_forecast: bool
+    location_climate: bool
+    criteria: Optional[Dict] = None
+    store: Optional[str] = None
+    workspace: Optional[str] = None
+
+    class Config:
+        from_attributes = True
+        json_schema_extra = {
+            "example": {
+                "type": "climate",
+                "name": "Días fríos",
+                "short_name": "TX10p",
+                "unit": "% días/año",
+                "temporality": "annual",
+                "description": "Cantidad total de días con temperaturas por debajo del percentil 10.",
+                "category_name": "Temperaturas Extremas",
+                "category_description": "Estos indicadores describen las variaciones y extremos en las condiciones de temperatura.",
+                "country_description": None,
+                "spatial_forecast": False,
+                "spatial_climate": True,
+                "location_forecast": False,
+                "location_climate": True,
+                "criteria": {"admin_level": 2, "threshold": 0.5},
+                "store": "climate_index_annual_ni_tx10p",
+                "workspace": "climate_index"
+            }
+        }
 
 
 class Country(BaseModel):
     id: int
     name: str
     iso2: str
+    # Climate measures configured for the country (empty when not loaded or not configured)
+    conf_climate: List[CountryClimateConf] = []
+    # Indicators configured for the country (empty when not loaded or not configured)
+    conf_indicator: List[CountryIndicatorConf] = []
 
     class Config:
         from_attributes = True
@@ -13,7 +116,9 @@ class Country(BaseModel):
             "example": {
                 "id": 1,
                 "name": "COLOMBIA",
-                "iso2": "CO"
+                "iso2": "CO",
+                "conf_climate": [CountryClimateConf.Config.json_schema_extra["example"]],
+                "conf_indicator": [CountryIndicatorConf.Config.json_schema_extra["example"]]
             }
         }
 
