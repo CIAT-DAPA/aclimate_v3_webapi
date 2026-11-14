@@ -3,11 +3,13 @@ from fastapi.responses import StreamingResponse
 from typing import Any, Dict, List, Optional, Tuple
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import logging
+import threading
 import zipstream
 import rioxarray
 from rasterio.io import MemoryFile
+from rasterio.warp import transform_geom
 from rioxarray.exceptions import NoDataInBounds
-from shapely.geometry import mapping, shape
+from shapely.geometry import box, mapping, shape
 
 from schemas.geoserver import PolygonDataRequest
 
@@ -29,6 +31,11 @@ logger = logging.getLogger(__name__)
 POLYGON_CRS = "EPSG:4326"
 # GeoJSON geometry types accepted to clip the rasters
 POLYGON_GEOMETRY_TYPES = ("Polygon", "MultiPolygon")
+
+# Rasters are downloaded in parallel but clipped one at a time: rasterio and rioxarray
+# rely on warnings.catch_warnings(), which is not thread-safe, so concurrent clips leak
+# spurious NotGeoreferencedWarning messages.
+_CLIP_LOCK = threading.Lock()
 
 
 def extract_polygon_geometries(geojson: Dict[str, Any]) -> List[Dict[str, Any]]:
@@ -80,6 +87,25 @@ def extract_polygon_geometries(geojson: Dict[str, Any]) -> List[Dict[str, Any]]:
     return geometries
 
 
+def polygons_intersect_raster(xds, geometries: List[Dict[str, Any]]) -> bool:
+    """
+    Check whether at least one polygon overlaps the extent of a raster.
+
+    - **xds**: Raster (rioxarray DataArray) with its CRS defined.
+    - **geometries**: GeoJSON polygon geometries in EPSG:4326.
+
+    Returns True when any polygon intersects the raster bounds.
+    """
+    raster_extent = box(*xds.rio.bounds())
+    # Compare every polygon against the raster extent in the raster CRS
+    for geometry in geometries:
+        projected = shape(transform_geom(POLYGON_CRS, xds.rio.crs, geometry))
+        # One overlapping polygon is enough to have data to clip
+        if projected.intersects(raster_extent):
+            return True
+    return False
+
+
 def clip_raster_bytes(raster_bytes: bytes, geometries: List[Dict[str, Any]]) -> Optional[bytes]:
     """
     Clip a GeoTIFF with the given polygon geometries.
@@ -97,6 +123,10 @@ def clip_raster_bytes(raster_bytes: bytes, geometries: List[Dict[str, Any]]) -> 
     # Rasters published without CRS are assumed to be in geographic coordinates
     if xds.rio.crs is None:
         xds = xds.rio.write_crs(POLYGON_CRS)
+
+    # Polygons completely outside the raster have no data to clip
+    if not polygons_intersect_raster(xds, geometries):
+        return None
 
     try:
         # all_touched=True keeps every pixel touched by the polygon, so polygons
@@ -136,7 +166,9 @@ def process_polygon_date(date_info: Dict[str, str], geometries: List[Dict[str, A
         return date_str, None
 
     try:
-        clipped_bytes = clip_raster_bytes(raster_bytes, geometries)
+        # Only one thread clips at a time (see _CLIP_LOCK)
+        with _CLIP_LOCK:
+            clipped_bytes = clip_raster_bytes(raster_bytes, geometries)
     except Exception as e:
         logger.error("Error clipping raster for %s: %s", date_str, e)
         return date_str, None

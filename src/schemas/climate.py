@@ -1,5 +1,5 @@
 from typing import Optional
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from datetime import date, datetime
 
 
@@ -14,9 +14,9 @@ class ClimateHistoricalMonthRecord(BaseModel):
     month: int
     value: float
 
-    class Config:
-        from_attributes = True
-        json_schema_extra = {
+    model_config = ConfigDict(
+        from_attributes=True,
+        json_schema_extra={
             "example": {
                 "id": 1,
                 "location_id": 114,
@@ -28,7 +28,8 @@ class ClimateHistoricalMonthRecord(BaseModel):
                 "month": 1,
                 "value": 90.16
             }
-        }
+        },
+    )
 
 
 class ClimateHistoricalDateRecord(BaseModel):
@@ -42,9 +43,9 @@ class ClimateHistoricalDateRecord(BaseModel):
     date: date
     value: float
 
-    class Config:
-        from_attributes = True
-        json_schema_extra = {
+    model_config = ConfigDict(
+        from_attributes=True,
+        json_schema_extra={
             "example": {
                 "id": 1,
                 "location_id": 103,
@@ -56,7 +57,8 @@ class ClimateHistoricalDateRecord(BaseModel):
                 "date": "1996-11-01",
                 "value": 23.0
             }
-        }
+        },
+    )
 
 
 class ClimateHistoricalIndicatorRecord(BaseModel):
@@ -72,9 +74,9 @@ class ClimateHistoricalIndicatorRecord(BaseModel):
     start_date: Optional[datetime] = None
     end_date: Optional[datetime] = None
 
-    class Config:
-        from_attributes = True
-        json_schema_extra = {
+    model_config = ConfigDict(
+        from_attributes=True,
+        json_schema_extra={
             "example": {
                 "id": 1,
                 "indicator_id": 2,
@@ -88,7 +90,8 @@ class ClimateHistoricalIndicatorRecord(BaseModel):
                 "start_date": "2024-01-01T00:00:00Z",
                 "end_date": "2024-01-31T00:00:00Z"
             }
-        }
+        },
+    )
 
 
 class MinMaxMonthRecord(BaseModel):
@@ -101,8 +104,8 @@ class MinMaxMonthRecord(BaseModel):
     max_value: float
     max_month: Optional[int] = None
 
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
                 "id": 2,
                 "name": "precipitation",
@@ -113,7 +116,8 @@ class MinMaxMonthRecord(BaseModel):
                 "max_value": 100.0,
                 "max_month": 2
             }
-        }
+        },
+    )
 
 
 class MinMaxDateRecord(BaseModel):
@@ -126,8 +130,8 @@ class MinMaxDateRecord(BaseModel):
     max_value: float
     max_date: Optional[datetime] = None
 
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
                 "id": 2,
                 "name": "precipitation",
@@ -138,4 +142,5 @@ class MinMaxDateRecord(BaseModel):
                 "max_value": 100.0,
                 "max_date": "2024-01-31T00:00:00Z"
             }
-        }
+        },
+    )

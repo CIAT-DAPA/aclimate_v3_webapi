@@ -1,5 +1,5 @@
 from typing import Optional, List, Dict
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from schemas.mng import SpatialClimateConf
 
 
@@ -24,9 +24,9 @@ class CountryClimateConf(BaseModel):
     spatial_climate_conf: Optional[List[SpatialClimateConf]] = None
     location_climate_conf: Optional[List[str]] = None
 
-    class Config:
-        from_attributes = True
-        json_schema_extra = {
+    model_config = ConfigDict(
+        from_attributes=True,
+        json_schema_extra={
             "example": {
                 "name": "Precipitación",
                 "short_name": "prec",
@@ -46,7 +46,8 @@ class CountryClimateConf(BaseModel):
                 ],
                 "location_climate_conf": ["daily", "monthly", "climatology"]
             }
-        }
+        },
+    )
 
 
 class CountryIndicatorConf(BaseModel):
@@ -77,9 +78,9 @@ class CountryIndicatorConf(BaseModel):
     store: Optional[str] = None
     workspace: Optional[str] = None
 
-    class Config:
-        from_attributes = True
-        json_schema_extra = {
+    model_config = ConfigDict(
+        from_attributes=True,
+        json_schema_extra={
             "example": {
                 "type": "climate",
                 "name": "Días fríos",
@@ -98,7 +99,8 @@ class CountryIndicatorConf(BaseModel):
                 "store": "climate_index_annual_ni_tx10p",
                 "workspace": "climate_index"
             }
-        }
+        },
+    )
 
 
 class Country(BaseModel):
@@ -110,17 +112,18 @@ class Country(BaseModel):
     # Indicators configured for the country (empty when not loaded or not configured)
     conf_indicator: List[CountryIndicatorConf] = []
 
-    class Config:
-        from_attributes = True
-        json_schema_extra = {
+    model_config = ConfigDict(
+        from_attributes=True,
+        json_schema_extra={
             "example": {
                 "id": 1,
                 "name": "COLOMBIA",
                 "iso2": "CO",
-                "conf_climate": [CountryClimateConf.Config.json_schema_extra["example"]],
-                "conf_indicator": [CountryIndicatorConf.Config.json_schema_extra["example"]]
+                "conf_climate": [CountryClimateConf.model_config["json_schema_extra"]["example"]],
+                "conf_indicator": [CountryIndicatorConf.model_config["json_schema_extra"]["example"]]
             }
-        }
+        },
+    )
 
 
 class Admin1(BaseModel):
@@ -131,9 +134,9 @@ class Admin1(BaseModel):
     country_name: str
     country_iso2: str
 
-    class Config:
-        from_attributes = True
-        json_schema_extra = {
+    model_config = ConfigDict(
+        from_attributes=True,
+        json_schema_extra={
             "example": {
                 "id": 1,
                 "name": "Putumayo",
@@ -142,7 +145,8 @@ class Admin1(BaseModel):
                 "country_name": "AMAZONIA",
                 "country_iso2": "ST"
             }
-        }
+        },
+    )
 
 
 class Admin2(BaseModel):
@@ -156,9 +160,9 @@ class Admin2(BaseModel):
     country_name: str | None
     country_iso2: str | None
 
-    class Config:
-        from_attributes = True
-        json_schema_extra = {
+    model_config = ConfigDict(
+        from_attributes=True,
+        json_schema_extra={
             "example": {
                 "id": 1,
                 "name": "Mocoa",
@@ -170,7 +174,8 @@ class Admin2(BaseModel):
                 "country_name": "AMAZONIA",
                 "country_iso2": "ST"
             }
-        }
+        },
+    )
 
 
 class Location(BaseModel):
@@ -194,9 +199,9 @@ class Location(BaseModel):
     country_iso2: Optional[str] = None
     source: Optional[str] = None
 
-    class Config:
-        from_attributes = True
-        json_schema_extra = {
+    model_config = ConfigDict(
+        from_attributes=True,
+        json_schema_extra={
             "example": {
                 "id": 1,
                 "name": "CAMPUCANA",
@@ -218,7 +223,8 @@ class Location(BaseModel):
                 "country_iso2": "ST",
                 "source": "IDEAM"
             }
-        }
+        },
+    )
 
 
 class MeasureData(BaseModel):
@@ -229,9 +235,9 @@ class MeasureData(BaseModel):
     measure_unit: Optional[str]
     value: Optional[float]
 
-    class Config:
-        from_attributes = True
-        json_schema_extra = {
+    model_config = ConfigDict(
+        from_attributes=True,
+        json_schema_extra={
             "example": {
                 "measure_id": 7,
                 "measure_name": "Minimum temperature",
@@ -239,7 +245,8 @@ class MeasureData(BaseModel):
                 "measure_unit": "°C",
                 "value": 20.71
             }
-        }
+        },
+    )
 
 
 class LatestData(BaseModel):
@@ -247,9 +254,9 @@ class LatestData(BaseModel):
     date: Optional[str]
     measures: List[MeasureData] = []
 
-    class Config:
-        from_attributes = True
-        json_schema_extra = {
+    model_config = ConfigDict(
+        from_attributes=True,
+        json_schema_extra={
             "example": {
                 "date": "1996-10-01",
                 "measures": [
@@ -262,7 +269,8 @@ class LatestData(BaseModel):
                     }
                 ]
             }
-        }
+        },
+    )
 
 
 class LocationWithData(BaseModel):
@@ -290,9 +298,9 @@ class LocationWithData(BaseModel):
     country_iso2: Optional[str]
     latest_data: Optional[LatestData]
 
-    class Config:
-        from_attributes = True
-        json_schema_extra = {
+    model_config = ConfigDict(
+        from_attributes=True,
+        json_schema_extra={
             "example": {
                 "id": 1,
                 "name": "CAMPUCANA",
@@ -328,4 +336,5 @@ class LocationWithData(BaseModel):
                     ]
                 }
             }
-        }
+        },
+    )

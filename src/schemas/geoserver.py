@@ -1,5 +1,5 @@
 from typing import Any, List, Literal, Optional, Dict
-from pydantic import BaseModel, field_validator
+from pydantic import BaseModel, ConfigDict, field_validator
 from datetime import date
 
 
@@ -7,13 +7,14 @@ class Coordinate(BaseModel):
     lon: float
     lat: float
 
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
                 "lon": -74.0817,
                 "lat": 4.6097
             }
-        }
+        },
+    )
 
 
 class PointDataRequest(BaseModel):
@@ -34,8 +35,8 @@ class PointDataRequest(BaseModel):
             raise ValueError('end_date must be >= start_date')
         return v
 
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
                 "coordinates": [[-74.0817, 4.6097], [-75.5, 6.2]],
                 "start_date": "2024-01-01",
@@ -44,7 +45,8 @@ class PointDataRequest(BaseModel):
                 "store": "precipitation",
                 "temporality": "daily"
             }
-        }
+        },
+    )
 
 
 class PointDataResult(BaseModel):
@@ -52,22 +54,23 @@ class PointDataResult(BaseModel):
     date: str
     value: float
 
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
                 "coordinate": [-74.0817, 4.6097],
                 "date": "2024-01-15",
                 "value": 12.5
             }
-        }
+        },
+    )
 
 
 class PointDataResponse(BaseModel):
     total_results: int
     data: List[PointDataResult]
 
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
                 "total_results": 2,
                 "data": [
@@ -78,7 +81,8 @@ class PointDataResponse(BaseModel):
                     }
                 ]
             }
-        }
+        },
+    )
 
 
 class PolygonDataRequest(BaseModel):
@@ -113,8 +117,8 @@ class PolygonDataRequest(BaseModel):
             raise ValueError('end_date must be >= start_date')
         return v
 
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
                 "polygon": {
                     "type": "Polygon",
@@ -128,7 +132,8 @@ class PolygonDataRequest(BaseModel):
                 "store": "climate_historical_daily_ni_prec",
                 "temporality": "daily"
             }
-        }
+        },
+    )
 
 
 class ClipGeoserverSource(BaseModel):
@@ -136,22 +141,23 @@ class ClipGeoserverSource(BaseModel):
     layer: str
     cql_filter: Optional[str] = None
 
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
                 "workspace": "aclimate",
                 "layer": "country_boundaries",
                 "cql_filter": "name = 'Colombia'"
             }
-        }
+        },
+    )
 
 
 class ClipConfig(BaseModel):
     enabled: bool = False
     geoserver: Optional[ClipGeoserverSource] = None
 
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
                 "enabled": True,
                 "geoserver": {
@@ -160,7 +166,8 @@ class ClipConfig(BaseModel):
                     "cql_filter": "name = 'Colombia'"
                 }
             }
-        }
+        },
+    )
 
 
 class RasterExportRequest(BaseModel):
@@ -182,8 +189,8 @@ class RasterExportRequest(BaseModel):
             raise ValueError('end_date must be >= start_date')
         return v
 
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
                 "workspace": "aclimate",
                 "store": "precipitation",
@@ -196,4 +203,5 @@ class RasterExportRequest(BaseModel):
                 },
                 "output_format": "zip"
             }
-        }
+        },
+    )
