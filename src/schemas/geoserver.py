@@ -136,6 +136,31 @@ class PolygonDataRequest(BaseModel):
     )
 
 
+class AdminAreaLayer(BaseModel):
+    """
+    Layer with administrative areas available in GeoServer.
+
+    - layer: Layer name, used to request its polygons.
+    - prefix: Text before "_adm{n}" in the layer name (country name, ISO2 or region).
+      None when the layer name does not follow that convention.
+    - level: Administrative level (0 = country, 1 = admin 1, 2 = admin 2, ...).
+      None when the layer name does not follow that convention.
+    """
+    layer: str
+    prefix: Optional[str] = None
+    level: Optional[int] = None
+
+    model_config = ConfigDict(
+        json_schema_extra={
+            "example": {
+                "layer": "colombia_adm1",
+                "prefix": "colombia",
+                "level": 1
+            }
+        },
+    )
+
+
 class ClipGeoserverSource(BaseModel):
     workspace: str
     layer: str

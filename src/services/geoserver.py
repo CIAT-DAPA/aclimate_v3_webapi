@@ -8,12 +8,15 @@ Centralizes:
 - Raster download with shared session
 - Adaptive date limits based on temporality
 - Structured logging
+- WFS access to vector layers (layer list, text attributes and feature search)
 """
 
 import logging
 import os
+import time
+import xml.etree.ElementTree as ET
 from datetime import date, timedelta
-from typing import Dict, List, Literal, Optional, Tuple
+from typing import Any, Dict, List, Literal, Optional, Tuple
 from urllib.parse import urlencode
 
 import requests
@@ -28,6 +31,10 @@ GEOSERVER_URL = os.getenv("GEOSERVER_URL", "https://geo.aclimate.org/geoserver/"
 GEOSERVER_USER = os.getenv("GEOSERVER_USER")
 GEOSERVER_PASSWORD = os.getenv("GEOSERVER_PASSWORD")
 MAX_WORKERS = int(os.getenv("MAX_WORKERS", "4"))
+# Workspace that holds the administrative areas (adm0 = country, adm1, adm2, ...)
+GEOSERVER_ADMIN_WORKSPACE = os.getenv("GEOSERVER_ADMIN_WORKSPACE", "administrative")
+# Maximum number of polygons returned by a single administrative area search
+GEOSERVER_ADMIN_MAX_FEATURES = int(os.getenv("GEOSERVER_ADMIN_MAX_FEATURES", "100"))
 
 # ---------- Constants ----------
 # Maximum dates allowed per temporality (sync mode)
@@ -38,6 +45,14 @@ MAX_DATES_BY_TEMPORALITY: Dict[str, int] = {
 }
 
 DEFAULT_TIMEOUT = 60  # seconds
+
+# WFS version used for vector layers
+WFS_VERSION = "2.0.0"
+# CRS of the returned features. The short "EPSG:4326" form makes GeoServer
+# answer with longitude/latitude axis order, as GeoJSON requires.
+WFS_OUTPUT_CRS = "EPSG:4326"
+# Seconds the list of layers of a workspace is kept in memory
+WFS_LAYERS_CACHE_TTL = 300
 
 
 # ---------- Auth ----------
@@ -192,3 +207,205 @@ def download_raster(
     except requests.exceptions.RequestException as e:
         logger.error("Error downloading raster for coverage=%s, time=%s: %s", store, time_subset, str(e))
         return time_subset, None
+
+
+# ---------- WFS (vector layers) ----------
+class GeoServerRequestError(Exception):
+    """Raised when GeoServer cannot be reached or answers a WFS request with an error."""
+
+
+# Cache of layer names per workspace: {workspace: (expiration time, layer names)}
+_wfs_layers_cache: Dict[str, Tuple[float, List[str]]] = {}
+_wfs_layers_cache_lock = threading.Lock()
+
+
+def build_wfs_url(workspace: str, params: Dict[str, Any]) -> str:
+    """
+    Build a WFS URL for a workspace.
+
+    - workspace: GeoServer workspace that owns the layers.
+    - params: WFS query parameters (request, typeNames, cql_filter, ...).
+      "service" and "version" are added automatically.
+    """
+    query = {"service": "WFS", "version": WFS_VERSION}
+    query.update(params)
+    return f"{get_geoserver_url()}{workspace}/ows?" + urlencode(query)
+
+
+def _wfs_get(workspace: str, params: Dict[str, Any],
+             session: Optional[requests.Session] = None) -> requests.Response:
+    """
+    Run a WFS GET request and return the response.
+
+    - workspace: GeoServer workspace that owns the layers.
+    - params: WFS query parameters.
+    - session: Optional requests session (defaults to the thread-local one).
+
+    Raises GeoServerRequestError on network errors or error status codes.
+    """
+    url = build_wfs_url(workspace, params)
+    # Reuse the thread-local session when the caller does not provide one
+    if session is None:
+        session = get_geoserver_session()
+
+    try:
+        resp = session.get(url, timeout=DEFAULT_TIMEOUT)
+        resp.raise_for_status()
+    except requests.exceptions.RequestException as e:
+        logger.error("WFS request failed (workspace=%s, request=%s): %s", workspace, params.get("request"), e)
+        raise GeoServerRequestError(f"GeoServer WFS request failed: {e}")
+    return resp
+
+
+def clear_wfs_layers_cache() -> None:
+    """Empty the in-memory cache of layer names (used by tests and after publishing layers)."""
+    with _wfs_layers_cache_lock:
+        _wfs_layers_cache.clear()
+
+
+def list_wfs_layers(workspace: str, session: Optional[requests.Session] = None) -> List[str]:
+    """
+    Return the names of the vector layers published in a workspace, sorted alphabetically.
+
+    The names do not include the workspace prefix (e.g. "colombia_adm1"). The result is
+    cached in memory for WFS_LAYERS_CACHE_TTL seconds.
+
+    - workspace: GeoServer workspace to inspect.
+    - session: Optional requests session (defaults to the thread-local one).
+
+    Raises GeoServerRequestError when GeoServer fails or its answer cannot be parsed.
+    """
+    now = time.monotonic()
+    with _wfs_layers_cache_lock:
+        cached = _wfs_layers_cache.get(workspace)
+        # Serve the cached list while it has not expired
+        if cached and cached[0] > now:
+            return list(cached[1])
+
+    resp = _wfs_get(workspace, {"request": "GetCapabilities"}, session)
+
+    try:
+        root = ET.fromstring(resp.content)
+    except ET.ParseError as e:
+        logger.error("Invalid WFS capabilities for workspace=%s: %s", workspace, e)
+        raise GeoServerRequestError(f"Invalid WFS capabilities returned by GeoServer: {e}")
+
+    layers = set()
+    # Go through every XML element looking for the FeatureType entries
+    for element in root.iter():
+        # Only FeatureType elements describe a layer (tags are namespaced: "{ns}FeatureType")
+        if element.tag.rsplit("}", 1)[-1] != "FeatureType":
+            continue
+        # Look for the Name child of the FeatureType
+        for child in element:
+            # The Name holds "workspace:layer"; keep only the layer part
+            if child.tag.rsplit("}", 1)[-1] == "Name" and child.text:
+                layers.add(child.text.strip().split(":", 1)[-1])
+
+    result = sorted(layers)
+    with _wfs_layers_cache_lock:
+        _wfs_layers_cache[workspace] = (now + WFS_LAYERS_CACHE_TTL, result)
+    return list(result)
+
+
+def get_wfs_layer_text_fields(workspace: str, layer: str,
+                              session: Optional[requests.Session] = None) -> List[str]:
+    """
+    Return the names of the text attributes of a layer (the fields a description can be searched in).
+
+    - workspace: GeoServer workspace that owns the layer.
+    - layer: Layer name without workspace prefix.
+    - session: Optional requests session (defaults to the thread-local one).
+
+    Raises GeoServerRequestError when GeoServer fails or its answer cannot be parsed.
+    """
+    resp = _wfs_get(
+        workspace,
+        {
+            "request": "DescribeFeatureType",
+            "typeNames": f"{workspace}:{layer}",
+            "outputFormat": "application/json",
+        },
+        session,
+    )
+
+    try:
+        feature_types = resp.json().get("featureTypes") or []
+    except ValueError as e:
+        logger.error("Invalid DescribeFeatureType answer for layer=%s: %s", layer, e)
+        raise GeoServerRequestError(f"Invalid layer description returned by GeoServer: {e}")
+
+    fields = []
+    # A DescribeFeatureType answer has one entry per requested layer
+    for feature_type in feature_types:
+        # Check every attribute of the layer
+        for prop in feature_type.get("properties") or []:
+            # Keep only text attributes; numbers, dates and geometries are not searchable
+            if prop.get("localType") == "string" and prop.get("name"):
+                fields.append(prop["name"])
+    return fields
+
+
+def build_text_search_cql(fields: List[str], text: str) -> str:
+    """
+    Build a CQL filter that matches features whose text fields contain a text (case-insensitive).
+
+    The text is escaped so it is always treated as a literal: quotes cannot close the
+    string and the LIKE wildcards (% and _) lose their special meaning.
+
+    - fields: Attribute names to search in.
+    - text: Text to look for.
+
+    Returns the CQL filter, e.g. "name" ILIKE '%cauca%' OR "code" ILIKE '%cauca%'.
+    """
+    # Escape the LIKE escape character first, then the wildcards and the quote
+    escaped = (
+        text.replace("\\", "\\\\")
+        .replace("%", "\\%")
+        .replace("_", "\\_")
+        .replace("'", "''")
+    )
+    conditions = []
+    # One ILIKE condition per text field, joined with OR
+    for field in fields:
+        quoted_field = field.replace('"', '""')
+        conditions.append(f"\"{quoted_field}\" ILIKE '%{escaped}%'")
+    return " OR ".join(conditions)
+
+
+def get_wfs_features(workspace: str, layer: str, cql_filter: Optional[str] = None,
+                     max_features: Optional[int] = None,
+                     session: Optional[requests.Session] = None) -> Dict[str, Any]:
+    """
+    Get the features of a layer as a GeoJSON FeatureCollection in EPSG:4326 (lon/lat).
+
+    - workspace: GeoServer workspace that owns the layer.
+    - layer: Layer name without workspace prefix.
+    - cql_filter: Optional CQL filter to select the features.
+    - max_features: Optional maximum number of features to return.
+    - session: Optional requests session (defaults to the thread-local one).
+
+    Raises GeoServerRequestError when GeoServer fails or does not answer with GeoJSON.
+    """
+    params: Dict[str, Any] = {
+        "request": "GetFeature",
+        "typeNames": f"{workspace}:{layer}",
+        "outputFormat": "application/json",
+        "srsName": WFS_OUTPUT_CRS,
+    }
+    # Only send the filter when the caller wants a subset of the layer
+    if cql_filter:
+        params["cql_filter"] = cql_filter
+    # Only limit the answer when a maximum was requested
+    if max_features:
+        params["count"] = max_features
+
+    resp = _wfs_get(workspace, params, session)
+
+    try:
+        data = resp.json()
+    except ValueError as e:
+        # GeoServer reports WFS errors as XML with status 200, which is not valid JSON
+        logger.error("GetFeature did not return GeoJSON for layer=%s: %s", layer, resp.text[:300])
+        raise GeoServerRequestError(f"GeoServer did not return GeoJSON: {e}")
+    return data
