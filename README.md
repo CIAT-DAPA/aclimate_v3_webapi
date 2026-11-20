@@ -79,6 +79,8 @@ CLIENT_SECRET=<client-secret>
 GEOSERVER_URL=<geoserver-url>
 GEOSERVER_USER=<geoserver-user>
 GEOSERVER_PASSWORD=<geoserver-password>
+GEOSERVER_ADMIN_WORKSPACE=administrative
+GEOSERVER_ADMIN_MAX_FEATURES=100
 MAX_WORKERS=4
 MAX_SYNC_DAYS=7
 HEALTH_TOKEN=<health-token>
@@ -86,7 +88,9 @@ HEALTH_TOKEN=<health-token>
 
 The file must be placed in `src/.env` (see `src/.env.example`). The `GEOSERVER_*` variables are
 required by the `/geoserver/*` endpoints and `MAX_WORKERS` sets how many rasters are downloaded in
-parallel.
+parallel. `GEOSERVER_ADMIN_WORKSPACE` is the workspace with the administrative areas (default
+`administrative`) and `GEOSERVER_ADMIN_MAX_FEATURES` the maximum number of polygons returned by one
+search (default `100`).
 ## 🚀 Run the API
 
 ```bash
@@ -228,3 +232,69 @@ curl -X POST "http://localhost:8000/geoserver/polygon-data" \
   -d @request.json \
   -o polygon_rasters.zip
 ```
+
+### `GET /geoserver/admin-areas/layers`
+
+Returns the layers with administrative areas published in the GeoServer workspace configured in
+`GEOSERVER_ADMIN_WORKSPACE`. The list is cached in memory for 5 minutes.
+
+```json
+[
+  { "layer": "colombia_adm0", "prefix": "colombia", "level": 0 },
+  { "layer": "colombia_adm1", "prefix": "colombia", "level": 1 },
+  { "layer": "et_adm3_wp", "prefix": "et", "level": 3 },
+  { "layer": "sat_amazonia_area_drenajes", "prefix": null, "level": null }
+]
+```
+
+- `level` is the administrative level: `0` = country, `1` = admin 1, `2` = admin 2, etc.
+- `prefix` is the text before `_adm{level}` in the layer name (country name, ISO2 or region).
+- Both are `null` when the layer name does not follow the `{prefix}_adm{level}` convention.
+
+### `GET /geoserver/admin-areas/polygon`
+
+Returns the polygons of an administrative area as GeoJSON.
+
+| Parameter | Description |
+|---|---|
+| `layer` | Layer name, as returned by `/geoserver/admin-areas/layers` (e.g. `colombia_adm1`) |
+| `description` | Text to search in the attributes of the layer (e.g. `Valle del Cauca`) |
+
+Each layer has its own attribute names, so the description is searched in **every text attribute**
+of the layer, with a partial and case-insensitive match (`valle` finds `Valle del Cauca`). All the
+polygons that match are returned (up to `GEOSERVER_ADMIN_MAX_FEATURES`).
+
+```bash
+curl -G "http://localhost:8000/geoserver/admin-areas/polygon" \
+  -H "Authorization: Bearer <access_token>" \
+  --data-urlencode "layer=colombia_adm1" \
+  --data-urlencode "description=Valle del Cauca"
+```
+
+Response: a GeoJSON `FeatureCollection` in EPSG:4326 with the original attributes of the layer in
+`properties` (the attribute names depend on the layer):
+
+```json
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "id": "colombia_adm1.31",
+      "geometry": { "type": "MultiPolygon", "coordinates": [[[[-76.5, 3.1], [-76.4, 3.1], [-76.4, 3.2], [-76.5, 3.1]]]] },
+      "properties": { "ADM1_ES": "Valle del Cauca", "ADM1_PCODE": "CO76" }
+    }
+  ]
+}
+```
+
+The response can be sent as the `polygon` of `POST /geoserver/polygon-data` to get the rasters
+clipped by that administrative area.
+
+| Status | When |
+|---|---|
+| `200` | GeoJSON with the polygons that match |
+| `404` | The layer does not exist in the workspace, or no polygon matches the description |
+| `422` | `layer` or `description` missing or empty |
+| `500` | GeoServer credentials not configured or unexpected error |
+| `502` | GeoServer is not available or returned an error |

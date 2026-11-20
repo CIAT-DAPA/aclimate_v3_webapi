@@ -12,7 +12,7 @@ from schemas.climate import (
 from schemas.mng import CountryIndicator, CountryClimateMeasure, IndicatorCategory, IndicatorFeature, Indicator, IndicatorWithFeatures
 from schemas.geoserver import (
     Coordinate, PointDataRequest, PointDataResult, PointDataResponse,
-    PolygonDataRequest,
+    PolygonDataRequest, AdminAreaLayer,
     ClipGeoserverSource, ClipConfig, RasterExportRequest,
 )
 from schemas.auth import (
@@ -39,7 +39,7 @@ __all__ = [
     "Indicator", "IndicatorWithFeatures",
     # geoserver
     "Coordinate", "PointDataRequest", "PointDataResult",
-    "PointDataResponse", "PolygonDataRequest",
+    "PointDataResponse", "PolygonDataRequest", "AdminAreaLayer",
     "ClipGeoserverSource", "ClipConfig",
     "RasterExportRequest",
     # auth
