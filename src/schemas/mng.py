@@ -1,5 +1,5 @@
 from typing import Optional, List, Dict
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 
 class CountryIndicator(BaseModel):
@@ -15,9 +15,9 @@ class CountryIndicator(BaseModel):
     store: Optional[str] = None
     workspace: Optional[str] = None
 
-    class Config:
-        from_attributes = True
-        json_schema_extra = {
+    model_config = ConfigDict(
+        from_attributes=True,
+        json_schema_extra={
             "example": {
                 "id": 1,
                 "country_id": 1,
@@ -31,7 +31,8 @@ class CountryIndicator(BaseModel):
                 "store": "precipitation_data",
                 "workspace": "default_workspace"
             }
-        }
+        },
+    )
 
 
 class ClimateMeasure(BaseModel):
@@ -41,9 +42,9 @@ class ClimateMeasure(BaseModel):
     unit: str
     description: Optional[str] = None
 
-    class Config:
-        from_attributes = True
-        json_schema_extra = {
+    model_config = ConfigDict(
+        from_attributes=True,
+        json_schema_extra={
             "example": {
                 "id": 1,
                 "name": "Precipitación",
@@ -51,7 +52,8 @@ class ClimateMeasure(BaseModel):
                 "unit": "mm",
                 "description": "Precipitación total acumulada"
             }
-        }
+        },
+    )
 
 
 class SpatialClimateConf(BaseModel):
@@ -59,15 +61,16 @@ class SpatialClimateConf(BaseModel):
     store: Optional[str] = None
     workspace: Optional[str] = None
 
-    class Config:
-        from_attributes = True
-        json_schema_extra = {
+    model_config = ConfigDict(
+        from_attributes=True,
+        json_schema_extra={
             "example": {
                 "temporality": "daily",
                 "store": "climate_historical_daily_ni_prec",
                 "workspace": "climate_historical_daily"
             }
-        }
+        },
+    )
 
 
 class CountryClimateMeasure(BaseModel):
@@ -82,9 +85,9 @@ class CountryClimateMeasure(BaseModel):
     location_climate_conf: Optional[List[str]] = None
     description: Optional[str] = None
 
-    class Config:
-        from_attributes = True
-        json_schema_extra = {
+    model_config = ConfigDict(
+        from_attributes=True,
+        json_schema_extra={
             "example": {
                 "id": 6,
                 "country_id": 4,
@@ -108,7 +111,8 @@ class CountryClimateMeasure(BaseModel):
                 "location_climate_conf": ["daily", "monthly", "climatology"],
                 "description": None
             }
-        }
+        },
+    )
 
 
 class IndicatorCategory(BaseModel):
@@ -117,16 +121,17 @@ class IndicatorCategory(BaseModel):
     description: Optional[str] = None
     enable: bool
 
-    class Config:
-        from_attributes = True
-        json_schema_extra = {
+    model_config = ConfigDict(
+        from_attributes=True,
+        json_schema_extra={
             "example": {
                 "id": 1,
                 "name": "Temperaturas Extremas",
                 "description": "Estos indicadores describen las variaciones y extremos en las condiciones de temperatura.",
                 "enable": True
             }
-        }
+        },
+    )
 
 
 class IndicatorFeature(BaseModel):
@@ -136,9 +141,9 @@ class IndicatorFeature(BaseModel):
     description: Optional[str] = None
     type: str
 
-    class Config:
-        from_attributes = True
-        json_schema_extra = {
+    model_config = ConfigDict(
+        from_attributes=True,
+        json_schema_extra={
             "example": {
                 "id": 1,
                 "country_indicator_id": 1,
@@ -146,7 +151,8 @@ class IndicatorFeature(BaseModel):
                 "description": "Best practices for managing temperature stress",
                 "type": "recommendation"
             }
-        }
+        },
+    )
 
 
 class Indicator(BaseModel):
@@ -160,9 +166,9 @@ class Indicator(BaseModel):
     description: Optional[str] = None
     enable: bool
 
-    class Config:
-        from_attributes = True
-        json_schema_extra = {
+    model_config = ConfigDict(
+        from_attributes=True,
+        json_schema_extra={
             "example": {
                 "id": 7,
                 "name": "Días fríos",
@@ -174,7 +180,8 @@ class Indicator(BaseModel):
                 "description": "Cantidad total de días con temperaturas por debajo del percentil 10.",
                 "enable": True
             }
-        }
+        },
+    )
 
 
 class PeriodResponse(BaseModel):
@@ -182,22 +189,23 @@ class PeriodResponse(BaseModel):
     label: str
     has_data: bool
 
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
                 "value": "annual",
                 "label": "Annual",
                 "has_data": True
             }
-        }
+        },
+    )
 
 
 class IndicatorWithFeatures(Indicator):
     features: Optional[List[IndicatorFeature]] = []
 
-    class Config:
-        from_attributes = True
-        json_schema_extra = {
+    model_config = ConfigDict(
+        from_attributes=True,
+        json_schema_extra={
             "example": {
                 "id": 7,
                 "name": "Días fríos",
@@ -210,4 +218,5 @@ class IndicatorWithFeatures(Indicator):
                 "enable": True,
                 "features": []
             }
-        }
+        },
+    )

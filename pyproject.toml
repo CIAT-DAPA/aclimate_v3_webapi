@@ -61,3 +61,11 @@ aclimate-v3-cut-spatial-data = { git = "https://github.com/CIAT-DAPA/aclimate_v3
 # `src` is added to sys.path so tests can import `main`, `routes`, `schemas`, etc.
 pythonpath = ["src"]
 testpaths = ["src/tests"]
+# Deprecation warnings raised inside third-party libraries (not in this code base).
+# Each filter matches one specific message, so any other warning is still reported.
+filterwarnings = [
+  # starlette's TestClient uses an alias deprecated by anyio
+  "ignore:The anyio.abc.BlockingPortal alias is deprecated:DeprecationWarning",
+  # geopandas imports the deprecated shapely.geos module
+  "ignore:The 'shapely.geos' module is deprecated:DeprecationWarning",
+]
