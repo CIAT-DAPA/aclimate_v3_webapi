@@ -23,7 +23,7 @@ class PointDataRequest(BaseModel):
     end_date: Optional[date] = None
     workspace: str
     store: str
-    temporality: Literal["daily", "monthly", "annual"] = "daily"
+    temporality: Literal["daily", "monthly", "annual", "climatology"] = "daily"
 
     @field_validator('end_date')
     @classmethod
