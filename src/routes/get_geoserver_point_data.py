@@ -110,7 +110,7 @@ def get_point_data_from_coordinates(
     - **end_date**: End date of the range  
     - **workspace**: Geoserver workspace
     - **store**: Geoserver store/mosaic
-    - **temporality**: Time frequency - "daily", "monthly", or "annual" (default: "daily")
+    - **temporality**: Time frequency - "daily", "monthly", "annual", "climatology" (default: "daily")
     """
     try:
         # Validate credentials are configured
@@ -140,6 +140,7 @@ def get_point_data_from_coordinates(
                     current_date = current_date.replace(month=current_date.month + 1)
             elif request.temporality == "annual":
                 current_date = current_date.replace(year=current_date.year + 1)
+            # For climatology, we can keep the current_date as is since it's a single representative date
 
         # Process dates in parallel
         all_results = []
