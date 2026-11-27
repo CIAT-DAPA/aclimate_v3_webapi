@@ -229,3 +229,58 @@ def test_polygon_data_returns_422_when_polygon_is_missing():
     del body["polygon"]
     response = client.post("/geoserver/polygon-data", json=body)
     assert response.status_code == 422
+
+
+# ---------- Climatology ----------
+
+def test_polygon_data_climatology_returns_one_raster_per_month_in_mm_format():
+    with patch(DOWNLOAD_RASTER, side_effect=_fake_download) as mock_download:
+        response = client.post(
+            "/geoserver/polygon-data",
+            json=_request_body(start_date="01", end_date="03", temporality="climatology"),
+        )
+
+    assert response.status_code == 200
+    # One clipped raster per month, named with the month in MM format
+    files = _read_zip(response.content)
+    assert sorted(files) == ["01.tif", "02.tif", "03.tif"]
+    with MemoryFile(files["01.tif"]) as memfile, memfile.open() as raster:
+        assert (raster.width, raster.height) == (4, 4)
+
+    # The rasters are requested to GeoServer with the reference year of the climatology
+    requested = sorted(call.args[2] for call in mock_download.call_args_list)
+    assert requested == [
+        'Time("2000-01-01T00:00:00.000Z")',
+        'Time("2000-02-01T00:00:00.000Z")',
+        'Time("2000-03-01T00:00:00.000Z")',
+    ]
+
+
+def test_polygon_data_climatology_without_end_date_returns_single_month():
+    body = _request_body(start_date="07", temporality="climatology")
+    del body["end_date"]
+    with patch(DOWNLOAD_RASTER, side_effect=_fake_download):
+        response = client.post("/geoserver/polygon-data", json=body)
+
+    assert response.status_code == 200
+    assert list(_read_zip(response.content)) == ["07.tif"]
+
+
+@pytest.mark.parametrize("overrides", [
+    # Months out of range or not zero-padded
+    {"start_date": "00", "end_date": "03", "temporality": "climatology"},
+    {"start_date": "01", "end_date": "13", "temporality": "climatology"},
+    {"start_date": "1", "end_date": "03", "temporality": "climatology"},
+    # Full dates are not valid for climatology
+    {"start_date": "2024-01-01", "end_date": "2024-03-01", "temporality": "climatology"},
+    # Ranges that cross the year are rejected
+    {"start_date": "11", "end_date": "02", "temporality": "climatology"},
+    # Months are only valid for climatology
+    {"start_date": "01", "end_date": "03", "temporality": "daily"},
+])
+def test_polygon_data_returns_422_when_range_does_not_match_temporality(overrides):
+    with patch(DOWNLOAD_RASTER, side_effect=_fake_download) as mock_download:
+        response = client.post("/geoserver/polygon-data", json=_request_body(**overrides))
+
+    assert response.status_code == 422
+    mock_download.assert_not_called()

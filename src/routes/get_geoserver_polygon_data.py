@@ -15,6 +15,7 @@ from schemas.geoserver import PolygonDataRequest
 
 from services.geoserver import (
     generate_date_list,
+    generate_climatology_month_list,
     get_geoserver_auth,
     get_geoserver_session,
     download_raster,
@@ -215,15 +216,16 @@ def get_polygon_data(
     """
     Gets the rasters of a date range clipped by a polygon.
 
-    Returns a ZIP file with one GeoTIFF per date (named `{date}.tif`), each one
+    Returns a ZIP file with one GeoTIFF per date (named `{date}.tif`, or `{MM}.tif` for
+    climatology), each one
     clipped to the polygon. Every pixel touched by the polygon is included.
 
     - **polygon**: GeoJSON with the polygon to cut data (Polygon, MultiPolygon, Feature or FeatureCollection in EPSG:4326)
-    - **start_date**: Start date of the range
-    - **end_date**: End date of the range
+    - **start_date**: Start date of the range (YYYY-MM-DD). For "climatology", start month in MM format (01-12)
+    - **end_date**: End date of the range (YYYY-MM-DD). For "climatology", end month in MM format (01-12)
     - **workspace**: Geoserver workspace
     - **store**: Geoserver store/mosaic
-    - **temporality**: Time frequency - "daily", "monthly", or "annual" (default: "daily")
+    - **temporality**: Time frequency - "daily", "monthly", "annual" or "climatology" (default: "daily")
     """
     try:
         # Validate credentials are configured
@@ -238,7 +240,11 @@ def get_polygon_data(
         # Generate date list using shared service
         start_date = request.start_date
         end_date = request.end_date if request.end_date else request.start_date
-        dates_to_process = generate_date_list(start_date, end_date, request.temporality)
+        if request.temporality == "climatology":
+            # Climatology has one raster per month: start_date and end_date are months in MM format
+            dates_to_process = generate_climatology_month_list(int(start_date), int(end_date))
+        else:
+            dates_to_process = generate_date_list(start_date, end_date, request.temporality)
 
         # Process dates in parallel
         results = []

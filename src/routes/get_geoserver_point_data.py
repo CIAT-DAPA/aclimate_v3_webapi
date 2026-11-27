@@ -11,6 +11,7 @@ from schemas.geoserver import Coordinate, PointDataRequest, PointDataResult, Poi
 
 from services.geoserver import (
     generate_date_list,
+    generate_climatology_month_list,
     get_geoserver_auth,
     get_geoserver_url,
     get_geoserver_session,
@@ -106,8 +107,8 @@ def get_point_data_from_coordinates(
     Gets point data from a raster for multiple coordinates within a date range.
     
     - **coordinates**: List of coordinates [[lon, lat], [lon, lat]]
-    - **start_date**: Start date of the range
-    - **end_date**: End date of the range  
+    - **start_date**: Start date of the range (YYYY-MM-DD). For "climatology", start month in MM format (01-12)
+    - **end_date**: End date of the range (YYYY-MM-DD). For "climatology", end month in MM format (01-12)
     - **workspace**: Geoserver workspace
     - **store**: Geoserver store/mosaic
     - **temporality**: Time frequency - "daily", "monthly", "annual", "climatology" (default: "daily")
@@ -121,8 +122,12 @@ def get_point_data_from_coordinates(
         start_date = request.start_date
         end_date = request.end_date if request.end_date else request.start_date
 
-        # Use the shared generate_date_list for consistency, then add 'date' field
-        base_dates = generate_date_list(start_date, end_date, request.temporality)
+        if request.temporality == "climatology":
+            # Climatology has one raster per month: start_date and end_date are months in MM format
+            base_dates = generate_climatology_month_list(int(start_date), int(end_date))
+        else:
+            # Use the shared generate_date_list for consistency, then add 'date' field
+            base_dates = generate_date_list(start_date, end_date, request.temporality)
         current_date = start_date
         for entry in base_dates:
             dates_to_process.append({
@@ -141,6 +146,7 @@ def get_point_data_from_coordinates(
             elif request.temporality == "annual":
                 current_date = current_date.replace(year=current_date.year + 1)
             # For climatology, we can keep the current_date as is since it's a single representative date
+            # (each result is identified by its month in 'date_str', in MM format)
 
         # Process dates in parallel
         all_results = []

@@ -46,6 +46,9 @@ MAX_DATES_BY_TEMPORALITY: Dict[str, int] = {
 
 DEFAULT_TIMEOUT = 60  # seconds
 
+# Year used by the climatology mosaics in their time dimension (see build_climatology_time_subset)
+CLIMATOLOGY_REFERENCE_YEAR = 2000
+
 # WFS version used for vector layers
 WFS_VERSION = "2.0.0"
 # CRS of the returned features. The short "EPSG:4326" form makes GeoServer
@@ -155,6 +158,41 @@ def generate_date_list(start: date, end: date, temporality: str) -> List[Dict[st
         dates.append({"date_str": date_str, "time_subset": time_subset})
 
     return dates
+
+
+def build_climatology_time_subset(month: int) -> str:
+    """
+    Build the WCS time subset that selects the climatology raster of a month.
+
+    - month: Month number (1 to 12).
+    """
+    ###AJUSTAR FORMATO CLIMATOLOGY###
+    # Today the climatology mosaics are published in GeoServer with a full date that uses
+    # CLIMATOLOGY_REFERENCE_YEAR as year (2000-01-01, 2000-02-01, ...). When they are
+    # published only by month (01, 02, 03, ...), this is the only place to change:
+    # return the subset that selects the month in the new format.
+    return f"Time(\"{CLIMATOLOGY_REFERENCE_YEAR:04d}-{month:02d}-01T00:00:00.000Z\")"
+
+
+def generate_climatology_month_list(start_month: int, end_month: int) -> List[Dict[str, str]]:
+    """
+    Generate a list of month info dictionaries for the climatology, from start_month to end_month.
+
+    Each dict has:
+        - "date_str": Month in MM format (e.g. "01")
+        - "time_subset": WCS time subset parameter string
+
+    - start_month: First month of the range (1 to 12).
+    - end_month: Last month of the range (1 to 12).
+    """
+    months = []
+    # One entry per month of the range, both ends included
+    for month in range(start_month, end_month + 1):
+        months.append({
+            "date_str": f"{month:02d}",
+            "time_subset": build_climatology_time_subset(month),
+        })
+    return months
 
 
 def get_max_dates_for_temporality(temporality: str) -> int:

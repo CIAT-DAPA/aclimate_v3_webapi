@@ -178,6 +178,50 @@ and indicators are included; a country without configuration returns empty lists
 > `GET /countries/by-name` returns the same entity, but `conf_climate` and `conf_indicator` are
 > always empty.
 
+### `POST /geoserver/point-data`
+
+Gets the values of a raster for a list of coordinates within a range.
+
+| Parameter | Description |
+|---|---|
+| `coordinates` | List of coordinates `[[lon, lat], [lon, lat]]` |
+| `start_date` | Start of the range: `YYYY-MM-DD`, or month in `MM` format for `climatology` |
+| `end_date` | End of the range (optional, defaults to `start_date`): `YYYY-MM-DD`, or month in `MM` format for `climatology` |
+| `workspace` | Geoserver workspace |
+| `store` | Geoserver store/mosaic |
+| `temporality` | Time frequency: `daily` (default), `monthly`, `annual` or `climatology` |
+
+A climatology has one raster per month and no year, so with `"temporality": "climatology"` the
+range is given in months (`"01"` to `"12"`) and each result is identified by its month:
+
+```json
+{
+  "coordinates": [[-86.25, 12.13]],
+  "start_date": "01",
+  "end_date": "03",
+  "workspace": "climate_historical_climatology",
+  "store": "climate_historical_climatology_ni_prec",
+  "temporality": "climatology"
+}
+```
+
+```json
+{
+  "total_results": 3,
+  "data": [
+    { "coordinate": [-86.25, 12.13], "date": "01", "value": 12.5 },
+    { "coordinate": [-86.25, 12.13], "date": "02", "value": 30.1 },
+    { "coordinate": [-86.25, 12.13], "date": "03", "value": 48.7 }
+  ]
+}
+```
+
+Sending a full date with `climatology`, or a month with any other temporality, answers `422`.
+
+> The climatology rasters are requested to GeoServer with the reference year `2000`
+> (`2000-01-01`, `2000-02-01`, ...). The place to change when the mosaics are published only by
+> month is marked with `###AJUSTAR FORMATO CLIMATOLOGY###` in `src/services/geoserver.py`.
+
 ### `POST /geoserver/polygon-data`
 
 Gets the rasters of a date range clipped by a polygon. It works like `/geoserver/point-data`, but
@@ -186,11 +230,11 @@ instead of a JSON with point values it returns the clipped rasters.
 | Parameter | Description |
 |---|---|
 | `polygon` | GeoJSON (EPSG:4326) with the polygon to cut data: `Polygon`, `MultiPolygon`, `Feature` or `FeatureCollection` |
-| `start_date` | Start date of the range (`YYYY-MM-DD`) |
-| `end_date` | End date of the range (optional, defaults to `start_date`) |
+| `start_date` | Start of the range: `YYYY-MM-DD`, or month in `MM` format for `climatology` |
+| `end_date` | End of the range (optional, defaults to `start_date`): `YYYY-MM-DD`, or month in `MM` format for `climatology` |
 | `workspace` | Geoserver workspace |
 | `store` | Geoserver store/mosaic |
-| `temporality` | Time frequency: `daily` (default), `monthly` or `annual` |
+| `temporality` | Time frequency: `daily` (default), `monthly`, `annual` or `climatology` |
 
 Request example:
 
@@ -210,6 +254,9 @@ Request example:
 
 Response: a ZIP file (`application/zip`) with one GeoTIFF per date, named `{date}.tif`
 (e.g. `2024-01-01.tif`; monthly and annual rasters use the first day of the month/year).
+With `climatology` the range is given in months (`"start_date": "01", "end_date": "03"`), as in
+`/geoserver/point-data`, and the files are named by month (`01.tif`, `02.tif`, `03.tif`). Ranges
+that cross the year (e.g. `11` to `02`) are rejected with `422`.
 
 - Every pixel touched by the polygon is included, so a polygon smaller than a pixel still returns
   data. Pixels inside the clipped extent but outside the polygon are set to nodata.
